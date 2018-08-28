@@ -1,0 +1,16 @@
+[
+{
+  "modid": "logisticsbots",
+  "name": "Logistics Bots",
+  "description": "A mod that adds factorio style logistics robots to minecraft.",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["Ninjabrain1"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
