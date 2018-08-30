@@ -19,19 +19,23 @@ public class ItemLogisticsRobot extends ItemBase {
 	@Override
 	public EnumActionResult onItemUse(EntityPlayer player, World worldIn, BlockPos pos, EnumHand hand,
 			EnumFacing facing, float hitX, float hitY, float hitZ) {
-
-		pos = pos.offset(facing);
-		ItemStack itemStack = player.getHeldItem(hand);
-		Entity robot = new EntityLogisticsRobot(worldIn);
-		robot.setPosition(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
-
-		worldIn.spawnEntity(robot);
-
-		if (!player.capabilities.isCreativeMode) {
-			itemStack.shrink(1);
+		
+		if (worldIn.isRemote) {
+			return EnumActionResult.SUCCESS;
+		} else {
+			pos = pos.offset(facing);
+			ItemStack itemStack = player.getHeldItem(hand);
+			Entity robot = new EntityLogisticsRobot(worldIn);
+			robot.setPosition(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
+	
+			worldIn.spawnEntity(robot);
+	
+			if (!player.capabilities.isCreativeMode) {
+				itemStack.shrink(1);
+			}
+	
+			return EnumActionResult.SUCCESS;
 		}
-
-		return EnumActionResult.SUCCESS;
 	}
 
 }

@@ -11,12 +11,12 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import ninjabrain.logisticsbots.EntityLogisticsRobot;
-import ninjabrain.logisticsbots.LogisticsBots;
 import ninjabrain.logisticsbots.item.ItemBase;
 import ninjabrain.logisticsbots.item.ModItems;
+import ninjabrain.logisticsbots.lib.LibMod;
 import ninjabrain.logisticsbots.render.RenderLogisticsRobot;
 
-@Mod.EventBusSubscriber(value = Side.CLIENT, modid = LogisticsBots.MODID)
+@Mod.EventBusSubscriber(value = Side.CLIENT, modid = LibMod.MODID)
 public class ClientProxy extends CommonProxy {
 	
 	@Override

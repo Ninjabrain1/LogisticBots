@@ -14,18 +14,20 @@ import ninjabrain.logisticsbots.EntityLogisticsRobot;
 import ninjabrain.logisticsbots.LogisticsBots;
 import ninjabrain.logisticsbots.item.ItemBase;
 import ninjabrain.logisticsbots.item.ModItems;
+import ninjabrain.logisticsbots.lib.LibMod;
+import ninjabrain.logisticsbots.lib.LibNames;
 
-@Mod.EventBusSubscriber(modid = LogisticsBots.MODID)
+@Mod.EventBusSubscriber(modid = LibMod.MODID)
 public class CommonProxy {
 	
 	public void preInit(FMLPreInitializationEvent event) {
-		registerEntity("logisticsRobot", EntityLogisticsRobot.class, 64, 10, false);
+		registerEntity(LibNames.ENTITY_LOGISTICS_ROBOT, EntityLogisticsRobot.class, 64, 10, false);
 	}
 	
 	private static int nextEntityID = 0;
 	private void registerEntity(String registryName, Class<? extends Entity> entityClass, int trackingRange, int updateFrequency, boolean sendsVelocityUpdates) {
 		EntityRegistry.registerModEntity(
-				new ResourceLocation(LogisticsBots.MODID, registryName),
+				new ResourceLocation(LibMod.MODID, registryName),
 				entityClass,
 				registryName,
 				nextEntityID++,
