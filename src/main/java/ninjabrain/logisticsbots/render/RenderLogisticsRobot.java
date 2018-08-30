@@ -4,7 +4,7 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.util.ResourceLocation;
-import ninjabrain.logisticsbots.EntityLogisticsRobot;
+import ninjabrain.logisticsbots.entity.EntityLogisticsRobot;
 import ninjabrain.logisticsbots.lib.LibResources;
 
 public class RenderLogisticsRobot extends Render<EntityLogisticsRobot> {

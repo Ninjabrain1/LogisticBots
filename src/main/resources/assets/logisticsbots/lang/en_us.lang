@@ -1,3 +1,5 @@
 item.logisticsRobot.name=Logistics Robot
 
+tile.logisticsChest.name=Logistics Chest
+
 itemGroup.logisticsbots=Logistics Bots
