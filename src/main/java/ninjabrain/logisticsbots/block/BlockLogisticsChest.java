@@ -8,6 +8,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import ninjabrain.logisticsbots.lib.LibMod;
 import ninjabrain.logisticsbots.tile.TileInventory;
 
 public class BlockLogisticsChest extends BlockBase {
@@ -25,7 +26,7 @@ public class BlockLogisticsChest extends BlockBase {
 			return true;
 		if (worldIn.isRemote)
 			return true;
-//		playerIn.openGui(mod, modGuiId, world, x, y, z);
+		playerIn.openGui(LibMod.MODID, 0, worldIn, pos.getX(), pos.getY(), pos.getZ());
 		return true;
 	}
 	

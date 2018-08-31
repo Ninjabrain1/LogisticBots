@@ -11,7 +11,7 @@ import net.minecraftforge.items.ItemStackHandler;
 
 public class TileInventory extends TileEntity {
 	
-	private static final int INVENTORY_SIZE = 27;
+	private static final int INVENTORY_SIZE = 54;
 	
 	protected ItemStackHandler itemStackHandler = createItemStackHandler();
 	
@@ -68,6 +68,10 @@ public class TileInventory extends TileEntity {
 		NBTTagCompound compound = new NBTTagCompound();
 		writePacketNBT(compound);
 		return new SPacketUpdateTileEntity(pos, 0, compound);
+	}
+
+	public ItemStackHandler getItemStackHandler() {
+		return itemStackHandler;
 	}
 	
 }
