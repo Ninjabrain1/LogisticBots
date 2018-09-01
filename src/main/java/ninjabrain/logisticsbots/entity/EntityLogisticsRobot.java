@@ -1,6 +1,7 @@
 package ninjabrain.logisticsbots.entity;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
@@ -18,6 +19,7 @@ public class EntityLogisticsRobot extends Entity {
 	protected void entityInit() {
 		// TODO create custom IItemHandler
 		itemStackHandler = new ItemStackHandler(1);
+		itemStackHandler.insertItem(0, new ItemStack(Item.getByNameOrId("minecraft:redstone"), 64), false);
 		setSize(0.3f, 0.4f);
 	}
 	
@@ -37,6 +39,14 @@ public class EntityLogisticsRobot extends Entity {
 	@Override
 	protected void writeEntityToNBT(NBTTagCompound compound) {
 		compound.merge(itemStackHandler.serializeNBT());
+	}
+	
+	/**
+	 * @return The ItemStack this robot is carrying. Returns ItemStack.EMPTY if the
+	 * stack is empty.
+	 */
+	public ItemStack getCarryingStack() {
+		return itemStackHandler.getStackInSlot(0);
 	}
 	
 	/**
