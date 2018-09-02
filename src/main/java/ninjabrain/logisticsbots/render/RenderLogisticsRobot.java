@@ -73,7 +73,7 @@ public class RenderLogisticsRobot extends Render<EntityLogisticsRobot> {
 	private void renderItem(EntityLogisticsRobot entity, double x, double y, double z, float entityYaw,
 			float partialTicks) {
 		RenderItem itemRenderer = Minecraft.getMinecraft().getRenderItem();
-		ItemStack itemstack = entity.getCarryingStack();
+		ItemStack itemstack = entity.getInventoryStack();
 		int i = itemstack.isEmpty() ? 187 : Item.getIdFromItem(itemstack.getItem()) + itemstack.getMetadata();
 		random.setSeed((long) i);
 		
@@ -123,7 +123,7 @@ public class RenderLogisticsRobot extends Render<EntityLogisticsRobot> {
 	
 	private int transformModelCount(EntityLogisticsRobot entity, double x, double y, double z, float partialTicks,
 			IBakedModel iBakedModel) {
-		ItemStack itemstack = entity.getCarryingStack();
+		ItemStack itemstack = entity.getInventoryStack();
 		Item item = itemstack.getItem();
 		
 		if (item == null) {
@@ -155,11 +155,4 @@ public class RenderLogisticsRobot extends Render<EntityLogisticsRobot> {
 		return i;
 	}
 	
-	public boolean shouldSpreadItems() {
-		return true;
-	}
-	
-	public boolean shouldBob() {
-		return false;
-	}
 }

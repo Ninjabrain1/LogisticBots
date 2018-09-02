@@ -1,15 +1,18 @@
 package ninjabrain.logisticsbots.entity;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.network.datasync.DataSerializers;
+import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.world.World;
-import net.minecraftforge.items.ItemStackHandler;
 
 public class EntityLogisticsRobot extends Entity {
 	
-	ItemStackHandler itemStackHandler;
+	private static final DataParameter<ItemStack> INVENTORY = EntityDataManager.<ItemStack>createKey(EntityLogisticsRobot.class, DataSerializers.ITEM_STACK);
+	
+	private static final String TAG_INVENTORY = "inventoryStack";
 	
 	public EntityLogisticsRobot(World worldIn) {
 		super(worldIn);
@@ -18,8 +21,7 @@ public class EntityLogisticsRobot extends Entity {
 	@Override
 	protected void entityInit() {
 		// TODO create custom IItemHandler
-		itemStackHandler = new ItemStackHandler(1);
-		itemStackHandler.insertItem(0, new ItemStack(Item.getByNameOrId("minecraft:redstone"), 64), false);
+		dataManager.register(INVENTORY, ItemStack.EMPTY);
 		setSize(0.3f, 0.4f);
 	}
 	
@@ -32,21 +34,27 @@ public class EntityLogisticsRobot extends Entity {
 	
 	@Override
 	protected void readEntityFromNBT(NBTTagCompound compound) {
-		itemStackHandler = new ItemStackHandler(1);
-		itemStackHandler.deserializeNBT(compound);
+		ItemStack loadedStack = new ItemStack(compound.getCompoundTag(TAG_INVENTORY));
+		setInventoryStack(loadedStack);
 	}
 	
 	@Override
 	protected void writeEntityToNBT(NBTTagCompound compound) {
-		compound.merge(itemStackHandler.serializeNBT());
+		System.out.println(getInventoryStack().serializeNBT());
+		compound.setTag(TAG_INVENTORY, getInventoryStack().serializeNBT());
 	}
 	
 	/**
 	 * @return The ItemStack this robot is carrying. Returns ItemStack.EMPTY if the
 	 * stack is empty.
 	 */
-	public ItemStack getCarryingStack() {
-		return itemStackHandler.getStackInSlot(0);
+	public ItemStack getInventoryStack() {
+		// TODO improve performance
+		return dataManager.get(INVENTORY);
+	}
+	
+	private void setInventoryStack(ItemStack itemStack) {
+		dataManager.set(INVENTORY, itemStack);
 	}
 	
 	/**
@@ -57,14 +65,22 @@ public class EntityLogisticsRobot extends Entity {
 	 * @return The remaining stack that was not picked up
 	 */
 	public ItemStack pickUpStack(ItemStack stack) {
-		return itemStackHandler.insertItem(0, stack, false);
+		// TODO pick up itemsstacks of the same item it already carries
+//		ItemHandlerHelper.canItemStacksStack(stack, inventory);
+		ItemStack inventory = getInventoryStack();
+		if (inventory.isEmpty()) {
+			setInventoryStack(stack);
+			return ItemStack.EMPTY;
+		}
+		return stack;
 	}
 	
 	/**
 	 * @return true if this robot is carrying any items, false otherwise
 	 */
 	public boolean isCarryingSomething() {
-		return !itemStackHandler.getStackInSlot(0).isEmpty();
+		// TODO improve performance
+		return !getInventoryStack().isEmpty();
 	}
 	
 }
