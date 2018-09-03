@@ -9,6 +9,7 @@ public class ModBlocks {
 	
 	public static ArrayList<Block> blocks = new ArrayList<Block>();
 	
-	public static final BlockBase blockStorageChest = new BlockLogisticsChest(LibNames.BLOCK_LOGISTICS_CHEST);
+	public static final BlockBase blockStorageChest = new BlockLogisticsChest(LibNames.BLOCK_STORAGE_CHEST);
+	public static final BlockBase blockActiveProviderChest = new BlockLogisticsChest(LibNames.BLOCK_ACTIVE_PROVIDER_CHEST);
 	
 }

@@ -9,7 +9,10 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 
-public class TileInventory extends TileEntity {
+/**
+ * Simple inventory TileEntity with 54 item slots
+ */
+public class TileSimpleInventory extends TileEntity {
 	
 	private static final int INVENTORY_SIZE = 54;
 	
@@ -29,6 +32,10 @@ public class TileInventory extends TileEntity {
 		if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
 			return CapabilityItemHandler.ITEM_HANDLER_CAPABILITY.cast(itemStackHandler);
 		return super.getCapability(capability, facing);
+	}
+	
+	public ItemStackHandler getItemStackHandler() {
+		return itemStackHandler;
 	}
 	
 	// ################################################################# //
@@ -68,10 +75,6 @@ public class TileInventory extends TileEntity {
 		NBTTagCompound compound = new NBTTagCompound();
 		writePacketNBT(compound);
 		return new SPacketUpdateTileEntity(pos, 0, compound);
-	}
-
-	public ItemStackHandler getItemStackHandler() {
-		return itemStackHandler;
 	}
 	
 }

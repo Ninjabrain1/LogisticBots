@@ -8,8 +8,9 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import ninjabrain.logisticsbots.lib.LibGUI;
 import ninjabrain.logisticsbots.lib.LibMod;
-import ninjabrain.logisticsbots.tile.TileInventory;
+import ninjabrain.logisticsbots.tile.TileSimpleInventory;
 
 public class BlockLogisticsChest extends BlockBase {
 	
@@ -22,11 +23,11 @@ public class BlockLogisticsChest extends BlockBase {
 			EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
 		
 		TileEntity te = worldIn.getTileEntity(pos);
-		if (te == null || !(te instanceof TileInventory))
+		if (te == null || !(te instanceof TileSimpleInventory))
 			return true;
 		if (worldIn.isRemote)
 			return true;
-		playerIn.openGui(LibMod.MODID, 0, worldIn, pos.getX(), pos.getY(), pos.getZ());
+		playerIn.openGui(LibMod.MODID, LibGUI.GUI_SIMPLE_INVENTORY_ID, worldIn, pos.getX(), pos.getY(), pos.getZ());
 		return true;
 	}
 	
@@ -37,7 +38,7 @@ public class BlockLogisticsChest extends BlockBase {
 	
 	@Override
 	public TileEntity createTileEntity(World world, IBlockState state) {
-		return new TileInventory();
+		return new TileSimpleInventory();
 	}
 	
 	@Override

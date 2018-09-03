@@ -6,6 +6,7 @@ public class LibNames {
 
 	public static final String ITEM_LOGISTICS_ROBOT = "logisticsRobot";
 	
-	public static final String BLOCK_LOGISTICS_CHEST = "logisticsChest";
+	public static final String BLOCK_STORAGE_CHEST = "storageChest";
+	public static final String BLOCK_ACTIVE_PROVIDER_CHEST = "activeProviderChest";
 
 }

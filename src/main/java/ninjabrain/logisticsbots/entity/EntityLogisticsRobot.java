@@ -12,7 +12,7 @@ public class EntityLogisticsRobot extends Entity {
 	
 	private static final DataParameter<ItemStack> INVENTORY = EntityDataManager.<ItemStack>createKey(EntityLogisticsRobot.class, DataSerializers.ITEM_STACK);
 	
-	private static final String TAG_INVENTORY = "inventoryStack";
+	private static final String TAG_INVENTORY = "invStack";
 	
 	public EntityLogisticsRobot(World worldIn) {
 		super(worldIn);
@@ -40,7 +40,6 @@ public class EntityLogisticsRobot extends Entity {
 	
 	@Override
 	protected void writeEntityToNBT(NBTTagCompound compound) {
-		System.out.println(getInventoryStack().serializeNBT());
 		compound.setTag(TAG_INVENTORY, getInventoryStack().serializeNBT());
 	}
 	

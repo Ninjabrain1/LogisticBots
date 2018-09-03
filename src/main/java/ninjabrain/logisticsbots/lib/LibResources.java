@@ -8,6 +8,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class LibResources {
 	
 	public static final ResourceLocation LOGISTICS_ROBOT_TEXTURE = new ResourceLocation(LibMod.MODID, "textures/entity/logisticsrobot.png");
-	public static final ResourceLocation LOGISTICS_CHEST_BG_TEXTURE = new ResourceLocation(LibMod.MODID, "textures/gui/logisticschest.png");
+	public static final ResourceLocation SIMPLE_CHEST_BG_TEXTURE = new ResourceLocation(LibMod.MODID, "textures/gui/simplechest.png");
 
 }

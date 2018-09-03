@@ -1,5 +1,6 @@
 item.logisticsRobot.name=Logistics Robot
 
-tile.logisticsChest.name=Logistics Chest
+tile.storageChest.name=Storage Chest
+tile.activeProviderChest.name=Active Provider Chest
 
 itemGroup.logisticsbots=Logistics Bots

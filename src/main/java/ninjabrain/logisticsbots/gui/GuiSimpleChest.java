@@ -6,12 +6,15 @@ import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraftforge.items.ItemStackHandler;
 import ninjabrain.logisticsbots.lib.LibResources;
 
-public class GuiLogisticsChest extends GuiContainer {
+/**
+ * Gui for TileSimpleInventory
+ */
+public class GuiSimpleChest extends GuiContainer {
 	
 	InventoryPlayer playerInv;
 	String guiName;
 	
-	public GuiLogisticsChest(InventoryPlayer playerInv, ItemStackHandler modInv, String guiName) {
+	public GuiSimpleChest(InventoryPlayer playerInv, ItemStackHandler modInv, String guiName) {
 		super(new ContainerMod(playerInv, modInv));
 		this.playerInv = playerInv;
 		this.guiName = guiName;
@@ -35,7 +38,7 @@ public class GuiLogisticsChest extends GuiContainer {
 	@Override
 	protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
 		GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-        this.mc.getTextureManager().bindTexture(LibResources.LOGISTICS_CHEST_BG_TEXTURE);
+        this.mc.getTextureManager().bindTexture(LibResources.SIMPLE_CHEST_BG_TEXTURE);
         int i = (this.width - this.xSize) / 2;
         int j = (this.height - this.ySize) / 2;
         this.drawTexturedModalRect(i, j, 0, 0, this.xSize, this.ySize);
