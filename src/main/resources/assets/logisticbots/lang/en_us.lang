@@ -1,0 +1,10 @@
+item.logisticRobot.name=Logistic Robot
+
+
+tile.logisticChest.name=Logistic Chest
+tile.logisticChest.storage.name=Storage Chest
+tile.logisticChest.activeProvider.name=Active Provider Chest
+tile.storageChest.name=Storage Chest
+tile.activeProviderChest.name=Active Provider Chest
+
+itemGroup.logisticbots=Logistic Bots
