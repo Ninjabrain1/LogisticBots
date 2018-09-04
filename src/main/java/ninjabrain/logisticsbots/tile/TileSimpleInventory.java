@@ -38,6 +38,15 @@ public class TileSimpleInventory extends TileEntity {
 		return itemStackHandler;
 	}
 	
+	/**
+	 * Returns the string that will be displayed as the name of this inventory when
+	 * the player opens this inventorys GUI. This is usually the same as the name of
+	 * the block this tile should be attached to.
+	 */
+	public String getGUIName() {
+		return "";
+	}
+	
 	// ################################################################# //
 	// ########################### NBT Stuff ########################### //
 	// ################################################################# //

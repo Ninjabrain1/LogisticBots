@@ -24,6 +24,7 @@ import ninjabrain.logisticsbots.item.ItemLogisticsChest;
 import ninjabrain.logisticsbots.item.ModItems;
 import ninjabrain.logisticsbots.lib.LibGUI;
 import ninjabrain.logisticsbots.lib.LibMod;
+import ninjabrain.logisticsbots.lib.LibNames;
 import ninjabrain.logisticsbots.tile.TileActiveProviderChest;
 import ninjabrain.logisticsbots.tile.TileSimpleInventory;
 import ninjabrain.logisticsbots.tile.TileStorageChest;
@@ -56,10 +57,10 @@ public class BlockLogisticsChest extends BlockBase {
 	@Override
 	public void breakBlock(World worldIn, BlockPos pos, IBlockState state) {
 		// TODO
-//		TileEntity te = worldIn.getTileEntity(pos);
-//		if (te != null && te instanceof TileInventory) {
-//			((TileInventory)te).
-//		}
+		// TileEntity te = worldIn.getTileEntity(pos);
+		// if (te != null && te instanceof TileInventory) {
+		// ((TileInventory)te).
+		// }
 		super.breakBlock(worldIn, pos, state);
 	}
 	
@@ -76,7 +77,7 @@ public class BlockLogisticsChest extends BlockBase {
 	@SideOnly(value = Side.CLIENT)
 	@Override
 	public void registerModels() {
-		for(int i = 0; i < Types.values().length; i++) {
+		for (int i = 0; i < Types.values().length; i++) {
 			Types type = Types.values()[i];
 			IBlockState state = getDefaultState().withProperty(TYPE, type);
 			Item item = Item.getItemFromBlock(state.getBlock());
@@ -109,18 +110,28 @@ public class BlockLogisticsChest extends BlockBase {
 	}
 	
 	/**
+	 * Returns the unlocalized name of the BlockLogisticsChest of the given type
+	 * with "tile." appended to the front
+	 */
+	public static String getUnlocalizedName(Types type) {
+		return ModBlocks.blockLogisticsChest.getUnlocalizedName() + "." + type.getUnlocalizedNameSuffix();
+	}
+	
+	/**
 	 * All types of logistics chests
 	 */
 	public enum Types implements IStringSerializable {
-		STORAGECHEST(TileStorageChest::new),
-		ACTIVEPROVIDERCHEST(TileActiveProviderChest::new);
+		STORAGECHEST(TileStorageChest::new, LibNames.STATE_STORAGE), ACTIVEPROVIDERCHEST(TileActiveProviderChest::new,
+				LibNames.STATE_ACTIVE_PROVIDER);
 		
 		final Supplier<TileEntity> tileEntitySupplier;
 		final String name;
+		final String unlocalizedNameSuffix;
 		
-		private Types(Supplier<TileEntity> tileEntitySupplier) {
+		private Types(Supplier<TileEntity> tileEntitySupplier, String unlocalizedNameSuffix) {
 			this.tileEntitySupplier = tileEntitySupplier;
 			this.name = name().toLowerCase();
+			this.unlocalizedNameSuffix = unlocalizedNameSuffix;
 		}
 		
 		public TileEntity createTileEntity() {
@@ -129,6 +140,10 @@ public class BlockLogisticsChest extends BlockBase {
 		
 		public int getMeta() {
 			return ordinal();
+		}
+		
+		public String getUnlocalizedNameSuffix() {
+			return unlocalizedNameSuffix;
 		}
 		
 		@Override

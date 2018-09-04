@@ -86,8 +86,7 @@ public class CommonProxy {
 			public Object getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
 				if (ID == LibGUI.GUI_SIMPLE_INVENTORY_ID) {
 					TileSimpleInventory inv = (TileSimpleInventory) world.getTileEntity(new BlockPos(x, y, z));
-					return new GuiSimpleChest(player.inventory, inv.getItemStackHandler(),
-							inv.getBlockType().getLocalizedName());
+					return new GuiSimpleChest(player.inventory, inv.getItemStackHandler(),inv.getGUIName());
 				}
 				return null;
 				// TODO Customize name for each inventory, (check instanceof TileSimpleInventory?)
