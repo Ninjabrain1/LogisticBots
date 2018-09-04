@@ -1,21 +1,43 @@
 package ninjabrain.logisticsbots.block;
 
+import java.util.function.Supplier;
+
 import net.minecraft.block.material.Material;
+import net.minecraft.block.properties.PropertyEnum;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.IStringSerializable;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+import ninjabrain.logisticsbots.LogisticsBots;
+import ninjabrain.logisticsbots.item.ItemLogisticsChest;
+import ninjabrain.logisticsbots.item.ModItems;
 import ninjabrain.logisticsbots.lib.LibGUI;
 import ninjabrain.logisticsbots.lib.LibMod;
+import ninjabrain.logisticsbots.tile.TileActiveProviderChest;
 import ninjabrain.logisticsbots.tile.TileSimpleInventory;
+import ninjabrain.logisticsbots.tile.TileStorageChest;
 
 public class BlockLogisticsChest extends BlockBase {
 	
+	public static final PropertyEnum<Types> TYPE = PropertyEnum.create("type", Types.class);
+	
 	public BlockLogisticsChest(String name) {
 		super(name, Material.IRON);
+		
+		setDefaultState(blockState.getBaseState().withProperty(TYPE, Types.ACTIVEPROVIDERCHEST));
+		
+		ModItems.items.add(new ItemLogisticsChest(this).setRegistryName(this.getRegistryName()));
 	}
 	
 	@Override
@@ -32,22 +54,88 @@ public class BlockLogisticsChest extends BlockBase {
 	}
 	
 	@Override
+	public void breakBlock(World worldIn, BlockPos pos, IBlockState state) {
+		// TODO
+//		TileEntity te = worldIn.getTileEntity(pos);
+//		if (te != null && te instanceof TileInventory) {
+//			((TileInventory)te).
+//		}
+		super.breakBlock(worldIn, pos, state);
+	}
+	
+	@Override
 	public boolean hasTileEntity(IBlockState state) {
 		return true;
 	}
 	
 	@Override
 	public TileEntity createTileEntity(World world, IBlockState state) {
-		return new TileSimpleInventory();
+		return state.getValue(TYPE).createTileEntity();
+	}
+	
+	@SideOnly(value = Side.CLIENT)
+	@Override
+	public void registerModels() {
+		for(int i = 0; i < Types.values().length; i++) {
+			Types type = Types.values()[i];
+			IBlockState state = getDefaultState().withProperty(TYPE, type);
+			Item item = Item.getItemFromBlock(state.getBlock());
+			int meta = i;
+			String id = TYPE.getName() + "=" + type.getName();
+			LogisticsBots.proxy.registerItemRenderer(item, meta, id);
+		}
 	}
 	
 	@Override
-	public void breakBlock(World worldIn, BlockPos pos, IBlockState state) {
-//		TileEntity te = worldIn.getTileEntity(pos);
-//		if (te != null && te instanceof TileInventory) {
-//			((TileInventory)te).
-//		}
-		super.breakBlock(worldIn, pos, state);
+	public void getSubBlocks(CreativeTabs itemIn, NonNullList<ItemStack> items) {
+		for (Types type : Types.values()) {
+			items.add(new ItemStack(this, 1, type.getMeta()));
+		}
+	}
+	
+	@Override
+	protected BlockStateContainer createBlockState() {
+		return new BlockStateContainer(this, TYPE);
+	}
+	
+	@Override
+	public int getMetaFromState(IBlockState state) {
+		return state.getValue(TYPE).getMeta();
+	}
+	
+	@Override
+	public IBlockState getStateFromMeta(int meta) {
+		return getDefaultState().withProperty(TYPE, Types.values()[meta]);
+	}
+	
+	/**
+	 * All types of logistics chests
+	 */
+	public enum Types implements IStringSerializable {
+		STORAGECHEST(TileStorageChest::new),
+		ACTIVEPROVIDERCHEST(TileActiveProviderChest::new);
+		
+		final Supplier<TileEntity> tileEntitySupplier;
+		final String name;
+		
+		private Types(Supplier<TileEntity> tileEntitySupplier) {
+			this.tileEntitySupplier = tileEntitySupplier;
+			this.name = name().toLowerCase();
+		}
+		
+		public TileEntity createTileEntity() {
+			return tileEntitySupplier.get();
+		}
+		
+		public int getMeta() {
+			return ordinal();
+		}
+		
+		@Override
+		public String getName() {
+			return name;
+		}
+		
 	}
 	
 }

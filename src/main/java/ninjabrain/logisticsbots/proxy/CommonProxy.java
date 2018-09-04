@@ -8,7 +8,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.event.RegistryEvent.Register;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
@@ -27,7 +27,9 @@ import ninjabrain.logisticsbots.item.ModItems;
 import ninjabrain.logisticsbots.lib.LibGUI;
 import ninjabrain.logisticsbots.lib.LibMod;
 import ninjabrain.logisticsbots.lib.LibNames;
+import ninjabrain.logisticsbots.tile.TileActiveProviderChest;
 import ninjabrain.logisticsbots.tile.TileSimpleInventory;
+import ninjabrain.logisticsbots.tile.TileStorageChest;
 
 @Mod.EventBusSubscriber(modid = LibMod.MODID)
 public class CommonProxy {
@@ -35,7 +37,8 @@ public class CommonProxy {
 	public void preInit(FMLPreInitializationEvent event) {
 		registerEntity(LibNames.ENTITY_LOGISTICS_ROBOT, EntityLogisticsRobot.class, 64, 10, false);
 		
-		registerTileEntity(TileSimpleInventory.class, LibNames.BLOCK_STORAGE_CHEST);
+		registerTileEntity(TileStorageChest.class, LibNames.STATE_STORAGE);
+		registerTileEntity(TileActiveProviderChest.class, LibNames.STATE_ACTIVE_PROVIDER);
 	}
 	
 	private static int nextEntityID = 0;
@@ -51,14 +54,14 @@ public class CommonProxy {
 	}
 	
 	@SubscribeEvent
-	public static void registerBlocks(RegistryEvent.Register<Block> event) {
+	public static void registerBlocks(Register<Block> event) {
 		IForgeRegistry<Block> registry = event.getRegistry();
 		for (Block block : ModBlocks.blocks)
 			registry.register(block);
 	}
 	
 	@SubscribeEvent
-	public static void registerItems(RegistryEvent.Register<Item> event) {
+	public static void registerItems(Register<Item> event) {
 		IForgeRegistry<Item> registry = event.getRegistry();
 		for (Item item : ModItems.items)
 			registry.register(item);
@@ -87,6 +90,7 @@ public class CommonProxy {
 							inv.getBlockType().getLocalizedName());
 				}
 				return null;
+				// TODO Customize name for each inventory, (check instanceof TileSimpleInventory?)
 			}
 		});
 	}
