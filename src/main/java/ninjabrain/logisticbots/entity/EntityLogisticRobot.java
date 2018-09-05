@@ -55,7 +55,7 @@ public class EntityLogisticRobot extends Entity {
 		return dataManager.get(INVENTORY);
 	}
 	
-	private void setInventoryStack(ItemStack itemStack) {
+	public void setInventoryStack(ItemStack itemStack) {
 		dataManager.set(INVENTORY, itemStack);
 	}
 	

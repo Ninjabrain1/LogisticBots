@@ -77,6 +77,8 @@ public class Network {
 	private ArrayList<TileActiveProviderChest> activeProviders;
 	private ArrayList<TileStorageChest> storages;
 	
+	private ArrayList<Task> tasks;
+	
 	/**
 	 * Create a new empty Logistic Network
 	 */
@@ -84,6 +86,7 @@ public class Network {
 		robots = new ArrayList<EntityLogisticRobot>();
 		activeProviders = new ArrayList<TileActiveProviderChest>();
 		storages = new ArrayList<TileStorageChest>();
+		tasks = new ArrayList<Task>();
 		
 		world.addEventListener(new NetworkWorldEventListener(this));
 	}
@@ -93,8 +96,12 @@ public class Network {
 	 */
 	public void onUpdate() {
 		
+//		tasks.forEach(task -> task.update());
+		tasks.removeIf(task -> task.update());
 		
-		
+		if (tasks.size() == 0 && robots.size() > 0 && storages.size() > 0 && activeProviders.size() > 0) {
+			tasks.add(new Task(storages.get(0), activeProviders.get(0), robots.get(0)));
+		}
 	}
 	
 	/**
