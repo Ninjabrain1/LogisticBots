@@ -14,6 +14,9 @@ public class EntityLogisticRobot extends Entity {
 	
 	private static final String TAG_INVENTORY = "invStack";
 	
+	/* The speed of Logistic Robots in Blocks/tick */
+	private static float speed = 1f/16f;
+	
 	public EntityLogisticRobot(World worldIn) {
 		super(worldIn);
 	}
@@ -65,7 +68,7 @@ public class EntityLogisticRobot extends Entity {
 	 */
 	public ItemStack pickUpStack(ItemStack stack) {
 		// TODO pick up itemsstacks of the same item it already carries
-//		ItemHandlerHelper.canItemStacksStack(stack, inventory);
+		// ItemHandlerHelper.canItemStacksStack(stack, inventory);
 		ItemStack inventory = getInventoryStack();
 		if (inventory.isEmpty()) {
 			setInventoryStack(stack);
@@ -80,6 +83,13 @@ public class EntityLogisticRobot extends Entity {
 	public boolean isCarryingSomething() {
 		// TODO improve performance
 		return !getInventoryStack().isEmpty();
+	}
+	
+	/**
+	 * Returns the max speed of this Logistic Robot in Blocks/tick
+	 */
+	public float getSpeed() {
+		return speed;
 	}
 	
 }

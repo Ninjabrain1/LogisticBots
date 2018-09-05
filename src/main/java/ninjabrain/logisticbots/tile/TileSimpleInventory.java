@@ -8,6 +8,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
+import ninjabrain.logisticbots.network.Network;
 
 /**
  * Simple inventory TileEntity with 54 item slots
@@ -20,6 +21,18 @@ public class TileSimpleInventory extends TileEntity {
 	
 	protected ItemStackHandler createItemStackHandler() {
 		return new ItemStackHandler(INVENTORY_SIZE);
+	}
+	
+	@Override
+	public void onLoad() {
+		if (!world.isRemote)
+			Network.onTileCreated(this);
+	}
+	
+	@Override
+	public void onChunkUnload() {
+		if (!world.isRemote)
+			Network.onTileRemoved(this);
 	}
 	
 	@Override

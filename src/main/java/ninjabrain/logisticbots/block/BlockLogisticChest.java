@@ -29,6 +29,10 @@ import ninjabrain.logisticbots.tile.TileActiveProviderChest;
 import ninjabrain.logisticbots.tile.TileSimpleInventory;
 import ninjabrain.logisticbots.tile.TileStorageChest;
 
+/**
+ * Block that contains all Logistic Chests in the mod. See
+ * BlockLogisticChest.ChestTypes.values() for a list of all logistic chests.
+ */
 public class BlockLogisticChest extends BlockBase {
 	
 	public static final PropertyEnum<ChestType> TYPE = PropertyEnum.create("type", ChestType.class);
@@ -121,8 +125,10 @@ public class BlockLogisticChest extends BlockBase {
 	 * All types of logistics chests
 	 */
 	public enum ChestType implements IStringSerializable {
+		// @formatter:off
 		STORAGECHEST(TileStorageChest::new, LibNames.STATE_STORAGE),
 		ACTIVEPROVIDERCHEST(TileActiveProviderChest::new, LibNames.STATE_ACTIVE_PROVIDER);
+		// @formatter:on
 		
 		final Supplier<TileEntity> tileEntitySupplier;
 		final String name;
