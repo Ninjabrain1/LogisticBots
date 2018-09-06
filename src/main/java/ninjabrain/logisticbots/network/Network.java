@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.Mod;
 import ninjabrain.logisticbots.LogisticBots;
 import ninjabrain.logisticbots.entity.EntityLogisticRobot;
 import ninjabrain.logisticbots.tile.TileActiveProviderChest;
@@ -15,11 +14,7 @@ import ninjabrain.logisticbots.tile.TileStorageChest;
  * A Logistics Network. Handles interactions between different types of
  * logistics chests and robots. A lot of this class is temporary.
  */
-@Mod.EventBusSubscriber
 public class Network {
-	
-	// TODO store networks in the world?
-	private static ArrayList<Network> networks = new ArrayList<Network>();
 	
 	/**
 	 * Called whenever a TileSimpleInventory is created in the server thread
@@ -28,7 +23,7 @@ public class Network {
 	 */
 	public static Network onTileCreated(TileSimpleInventory tile) {
 		BlockPos pos = tile.getPos();
-		for (Network network : networks) {
+		for (Network network : NetworkCollection.getNetworkCollection(tile.getWorld()).networkList) {
 			if (network.contains(pos)) {
 				network.addChest(tile);
 				return network;
@@ -50,17 +45,20 @@ public class Network {
 	// ************************************************************* //
 	// ************************************************************* //
 	
-	private ArrayList<EntityLogisticRobot> robots;
+	private final World world;
 	
-	private ArrayList<TileActiveProviderChest> activeProviders;
-	private ArrayList<TileStorageChest> storages;
+	private final ArrayList<EntityLogisticRobot> robots;
 	
-	private ArrayList<Task> tasks;
+	private final ArrayList<TileActiveProviderChest> activeProviders;
+	private final ArrayList<TileStorageChest> storages;
+	
+	private final ArrayList<Task> tasks;
 	
 	/**
 	 * Create a new empty Logistic Network
 	 */
 	public Network(World world) {
+		this.world = world;
 		robots = new ArrayList<EntityLogisticRobot>();
 		activeProviders = new ArrayList<TileActiveProviderChest>();
 		storages = new ArrayList<TileStorageChest>();
@@ -73,14 +71,14 @@ public class Network {
 	 * Loads this Network to the game
 	 */
 	public void load() {
-		networks.add(this);
+		NetworkCollection.getNetworkCollection(world).networkList.add(this);
 	}
 	
 	/**
 	 * Unloads this Network from the game
 	 */
 	public void unload() {
-		networks.remove(this);
+		NetworkCollection.getNetworkCollection(world).networkList.remove(this);
 	}
 	
 	/**
@@ -93,7 +91,7 @@ public class Network {
 		if (tasks.size() == 0 && robots.size() > 0 && storages.size() > 0 && activeProviders.size() > 0) {
 			tasks.add(new Task(activeProviders.get(0), storages.get(0), robots.get(0)));
 		}
-		System.out.println(networks.size());
+		System.out.println(NetworkCollection.getNetworkCollection(world).networkList.size());
 //		LogisticBots.logger.info("Network:" + networks.indexOf(this) + ", Robots:" + robots.size() + ", storages:"
 //				+ storages.size() + ", active roviders:" + activeProviders.size());
 	}
