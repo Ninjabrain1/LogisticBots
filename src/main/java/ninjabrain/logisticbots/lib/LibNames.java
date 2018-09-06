@@ -10,6 +10,7 @@ public class LibNames {
 	
 	// Blocks
 	public static final String BLOCK_LOGISTICS_CHEST = "logisticChest";
+	public static final String BLOCK_ROBOPORT = "roboport";
 	
 	// BlockStates
 	public static final String STATE_STORAGE = "storage";

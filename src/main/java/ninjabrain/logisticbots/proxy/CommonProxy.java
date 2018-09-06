@@ -28,6 +28,7 @@ import ninjabrain.logisticbots.lib.LibGUI;
 import ninjabrain.logisticbots.lib.LibMod;
 import ninjabrain.logisticbots.lib.LibNames;
 import ninjabrain.logisticbots.tile.TileActiveProviderChest;
+import ninjabrain.logisticbots.tile.TileRoboport;
 import ninjabrain.logisticbots.tile.TileSimpleInventory;
 import ninjabrain.logisticbots.tile.TileStorageChest;
 
@@ -35,8 +36,9 @@ import ninjabrain.logisticbots.tile.TileStorageChest;
 public class CommonProxy {
 	
 	public void preInit(FMLPreInitializationEvent event) {
-		registerEntity(LibNames.ENTITY_LOGISTICS_ROBOT, EntityLogisticRobot.class, 64, 10, false);
+		registerEntity(LibNames.ENTITY_LOGISTICS_ROBOT, EntityLogisticRobot.class, 64, 1, false);
 		
+		registerTileEntity(TileRoboport.class, LibNames.BLOCK_ROBOPORT);
 		registerTileEntity(TileStorageChest.class, LibNames.STATE_STORAGE);
 		registerTileEntity(TileActiveProviderChest.class, LibNames.STATE_ACTIVE_PROVIDER);
 	}

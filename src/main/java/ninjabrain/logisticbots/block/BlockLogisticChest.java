@@ -60,11 +60,15 @@ public class BlockLogisticChest extends BlockBase {
 	
 	@Override
 	public void breakBlock(World worldIn, BlockPos pos, IBlockState state) {
-		// TODO
+		// TODO drop items when broken
 		// TileEntity te = worldIn.getTileEntity(pos);
 		// if (te != null && te instanceof TileInventory) {
 		// ((TileInventory)te).
 		// }
+		TileEntity tile = worldIn.getTileEntity(pos);
+		if (tile instanceof TileSimpleInventory) {
+			((TileSimpleInventory)tile).onRemove();
+		}
 		super.breakBlock(worldIn, pos, state);
 	}
 	

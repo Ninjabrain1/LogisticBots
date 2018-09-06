@@ -10,5 +10,6 @@ public class ModBlocks {
 	public static ArrayList<Block> blocks = new ArrayList<Block>();
 	
 	public static final BlockLogisticChest blockLogisticsChest = new BlockLogisticChest(LibNames.BLOCK_LOGISTICS_CHEST);
+	public static final BlockRoboport blockRoboport = new BlockRoboport(LibNames.BLOCK_ROBOPORT);
 	
 }

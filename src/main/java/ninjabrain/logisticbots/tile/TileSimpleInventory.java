@@ -1,5 +1,7 @@
 package ninjabrain.logisticbots.tile;
 
+import javax.annotation.Nullable;
+
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
@@ -19,6 +21,10 @@ public class TileSimpleInventory extends TileEntity {
 	
 	protected ItemStackHandler itemStackHandler = createItemStackHandler();
 	
+	/** The Logistic Network this chest is connected to, null if none **/
+	@Nullable
+	protected Network network;
+	
 	protected ItemStackHandler createItemStackHandler() {
 		return new ItemStackHandler(INVENTORY_SIZE);
 	}
@@ -26,11 +32,15 @@ public class TileSimpleInventory extends TileEntity {
 	@Override
 	public void onLoad() {
 		if (!world.isRemote)
-			Network.onTileCreated(this);
+			network = Network.onTileCreated(this);
 	}
 	
 	@Override
 	public void onChunkUnload() {
+		onRemove();
+	}
+	
+	public void onRemove() {
 		if (!world.isRemote)
 			Network.onTileRemoved(this);
 	}
@@ -58,6 +68,13 @@ public class TileSimpleInventory extends TileEntity {
 	 */
 	public String getGUIName() {
 		return "";
+	}
+	
+	/**
+	 * Returns the Logistic Network this chest is connected to, null if none
+	 */
+	public Network getNetwork() {
+		return network;
 	}
 	
 	// ################################################################# //
