@@ -2,12 +2,13 @@ package ninjabrain.logisticbots.tile;
 
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ITickable;
+import ninjabrain.logisticbots.api.network.INetworkProvider;
 import ninjabrain.logisticbots.network.Network;
 
 /**
  * Roboport tile entity that contains a Logistic Network
  */
-public class TileRoboport extends TileEntity implements ITickable {
+public class TileRoboport extends TileEntity implements ITickable, INetworkProvider {
 	
 	Network network;
 	

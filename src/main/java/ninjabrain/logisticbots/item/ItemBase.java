@@ -9,7 +9,6 @@ public class ItemBase extends Item implements IModelRegister {
 	public ItemBase(String name) {
 		setUnlocalizedName(name);
 		setRegistryName(name);
-		System.out.println(LogisticBots.creativeTab);
 		setCreativeTab(LogisticBots.creativeTab);
 
 		ModItems.items.add(this);

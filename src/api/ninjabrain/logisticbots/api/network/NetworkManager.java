@@ -75,11 +75,13 @@ public class NetworkManager {
 	 * Whether the INetwork can extract items from the storage unconditionally
 	 * @param priority
 	 * The storage's priority. The INetwork wants to extract from storages with low
-	 * priority and insert to storages with high priority.
+	 * priority and insert to storages with high priority. Exactly how the network
+	 * will handle priorities depends on the implementation.
 	 * @return The INetwork the storage was added to, null if it was not added to a
 	 * network
 	 */
-	public INetwork addNetworkStorage(INetworkStorage<? extends IStorable> storage, boolean openInput, boolean openOutput, int priority) {
+	public static INetwork addNetworkStorage(INetworkStorage<? extends IStorable> storage, boolean openInput,
+			boolean openOutput, int priority) {
 		BlockPos pos = storage.getPos();
 		for (INetwork network : NetworkManager.getNetworkCollection(storage.getWorld()).networkList) {
 			if (network.contains(pos) && network.canAddStorage(storage)) {
@@ -96,7 +98,7 @@ public class NetworkManager {
 	 * @param storage
 	 * The storage that should be removed
 	 */
-	public void removeNetworkStorage(INetworkStorage<? extends IStorable> storage) {
+	public static void removeNetworkStorage(INetworkStorage<? extends IStorable> storage) {
 		storage.getNetwork().removeStorage(storage);
 	}
 	

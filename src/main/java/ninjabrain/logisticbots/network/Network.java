@@ -1,58 +1,37 @@
 package ninjabrain.logisticbots.network;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import ninjabrain.logisticbots.LogisticBots;
+import ninjabrain.logisticbots.api.network.INetwork;
+import ninjabrain.logisticbots.api.network.INetworkStorage;
+import ninjabrain.logisticbots.api.network.IStorable;
+import ninjabrain.logisticbots.api.network.NetworkManager;
 import ninjabrain.logisticbots.entity.EntityLogisticRobot;
-import ninjabrain.logisticbots.tile.TileActiveProviderChest;
-import ninjabrain.logisticbots.tile.TileSimpleInventory;
-import ninjabrain.logisticbots.tile.TileStorageChest;
 
 /**
  * A Logistics Network. Handles interactions between different types of
- * logistics chests and robots. A lot of this class is temporary.
+ * logistics chests and robots.
  */
-public class Network {
+public class Network implements INetwork {
+	
+	protected final World world;
+	
+	protected final ArrayList<EntityLogisticRobot> robots;
+	
+	protected final ArrayList<Task> tasks;
 	
 	/**
-	 * Called whenever a TileSimpleInventory is created in the server thread
-	 * 
-	 * @return the network the tile was added to, null if it was not added to a network
-	 */
-	public static Network onTileCreated(TileSimpleInventory tile) {
-		BlockPos pos = tile.getPos();
-		for (Network network : NetworkCollection.getNetworkCollection(tile.getWorld()).networkList) {
-			if (network.contains(pos)) {
-				network.addChest(tile);
-				return network;
-			}
-		}
-		return null;
-	}
-	
-	/**
-	 * Called whenever a TileSimpleInventory is removed in the server thread
-	 */
-	public static void onTileRemoved(TileSimpleInventory tile) {
-		boolean removed = tile.getNetwork().removeChest(tile);
-		if (!removed)
-			LogisticBots.logger.error("TileEntity " + tile + " was missing from the network and could not be removed.");
-	}
-	
-	// ************************************************************* //
-	// ************************************************************* //
-	// ************************************************************* //
-	
-	private final World world;
-	
-	private final ArrayList<EntityLogisticRobot> robots;
-	
-	private final ArrayList<TileActiveProviderChest> activeProviders;
-	private final ArrayList<TileStorageChest> storages;
-	
-	private final ArrayList<Task> tasks;
+	 * Each entry in this List is a List of storages that all have the same
+	 * priority. The List is sorted in ascending order with respect to
+	 * ListWithPriosity.priority. It is assumed that the number of distinct priority
+	 * values is low (only 0-2 is used by default) for a lot of methods in this
+	 * class to be efficient.
+	 **/
+	protected final List<ListWithPriority<INetworkStorage<? extends IStorable>>> storages;
 	
 	/**
 	 * Create a new empty Logistic Network
@@ -60,40 +39,105 @@ public class Network {
 	public Network(World world) {
 		this.world = world;
 		robots = new ArrayList<EntityLogisticRobot>();
-		activeProviders = new ArrayList<TileActiveProviderChest>();
-		storages = new ArrayList<TileStorageChest>();
 		tasks = new ArrayList<Task>();
+		
+		storages = new ArrayList<ListWithPriority<INetworkStorage<?>>>();
 		
 		world.addEventListener(new NetworkWorldEventListener(this));
 	}
 	
-	/**
-	 * Loads this Network to the game
-	 */
+	@Override
 	public void load() {
-		NetworkCollection.getNetworkCollection(world).networkList.add(this);
+		NetworkManager.addNetworkToWorld(this, world);
 	}
 	
-	/**
-	 * Unloads this Network from the game
-	 */
+	@Override
 	public void unload() {
-		NetworkCollection.getNetworkCollection(world).networkList.remove(this);
+		NetworkManager.removeNetworkfromoWorld(this, world);
 	}
 	
-	/**
-	 * Called every tick in the server thread
-	 */
+	@Override
 	public void onUpdate() {
 		
-		tasks.removeIf(task -> task.update());
+//		System.out.println(storages.get(0).size());
 		
-		if (tasks.size() == 0 && robots.size() > 0 && storages.size() > 0 && activeProviders.size() > 0) {
-			tasks.add(new Task(activeProviders.get(0), storages.get(0), robots.get(0)));
+//		getStoragesFromPriority(-20, true);
+//		getStoragesFromPriority(3, true);
+//		getStoragesFromPriority(100, true);
+//		getStoragesFromPriority(3, true);
+//		getStoragesFromPriority(1, true);
+//		getStoragesFromPriority(2, true);
+//		getStoragesFromPriority(-1, true);
+		
+		String s = "";
+		for (ListWithPriority<INetworkStorage<? extends IStorable>> storageList : storages) {
+			s += " " + storageList.priority;
 		}
-		System.out.println(NetworkCollection.getNetworkCollection(world).networkList.size());
-//		LogisticBots.logger.info("Network:" + networks.indexOf(this) + ", Robots:" + robots.size() + ", storages:"
-//				+ storages.size() + ", active roviders:" + activeProviders.size());
+		System.out.println(((ListWithPriority)getStoragesFromPriority(-3, false)).priority);
+		
+		// tasks.removeIf(task -> task.update());
+		
+		// if (tasks.size() == 0 && robots.size() > 0 && storages.size() > 0 &&
+		// activeProviders.size() > 0) {
+		// tasks.add(new Task(activeProviders.get(0), storages.get(0), robots.get(0)));
+		// }
+		
+		// LogisticBots.logger.info("Network:" + networks.indexOf(this) + ", Robots:" +
+		// robots.size() + ", storages:"
+		// + storages.size() + ", active roviders:" + activeProviders.size());
+	}
+	
+	@Override
+	public boolean contains(BlockPos pos) {
+		return true;
+	}
+	
+	@Override
+	public boolean canAddStorage(INetworkStorage<? extends IStorable> storage) {
+		return true;
+	}
+	
+	@Override
+	public void addStorage(INetworkStorage<? extends IStorable> storage, boolean openInput, boolean openOutput,
+			int priority) {
+		getStoragesFromPriority(priority, true).add(storage);
+	}
+	
+	@Override
+	public void removeStorage(INetworkStorage<? extends IStorable> storage) {
+		for (ListWithPriority<INetworkStorage<? extends IStorable>> storageList : storages) {
+			if (storageList.remove(storage))
+				return;
+		}
+	}
+	
+	/**
+	 * Gets the list of storages of the given priority
+	 * 
+	 * @param createIfMissing
+	 * If there is no storage list with the given priority this method will return:
+	 * null if createIfMissing is false, a new list if createIfMissing is true.
+	 */
+	protected List<INetworkStorage<? extends IStorable>> getStoragesFromPriority(int priority,
+			boolean createIfMissing) {
+		// Linear search. Could use binary search but seems like overkill as long as the
+		// number of priorities is low
+		int i;
+		for (i = 0; i < storages.size(); i++) {
+			int listPriority = storages.get(i).priority;
+			if (listPriority == priority) {
+				return storages.get(i);
+			} else if (listPriority > priority) {
+				break;
+			}
+		}
+		if (createIfMissing) {
+			ListWithPriority<INetworkStorage<? extends IStorable>> newList = new ListWithPriority<INetworkStorage<? extends IStorable>>(
+					priority);
+			storages.add(i, newList);
+			return newList;
+		}
+		return null;
 	}
 	
 	/**
@@ -115,42 +159,16 @@ public class Network {
 		}
 	}
 	
-	/**
-	 * Returns true if the given BlockPos is within this networks boundaries
-	 */
-	public boolean contains(BlockPos pos) {
-		return true;
-	}
+}
+
+class ListWithPriority<E> extends ArrayList<E> {
 	
-	/**
-	 * Adds the given chest to the network
-	 */
-	private void addChest(TileSimpleInventory tile) {
-		// TODO can this be made more elegant?
-		if (tile instanceof TileStorageChest) {
-			storages.add((TileStorageChest) tile);
-			return;
-		}
-		if (tile instanceof TileActiveProviderChest) {
-			activeProviders.add((TileActiveProviderChest) tile);
-			return;
-		}
-	}
+	private static final long serialVersionUID = -5709722441201341712L;
 	
-	/**
-	 * Removes the given chest from the network
-	 * 
-	 * @return true if the chest was removed
-	 */
-	private boolean removeChest(TileSimpleInventory tile) {
-		// TODO can this be made more elegant?
-		if (tile instanceof TileStorageChest) {
-			return storages.remove(tile);
-		}
-		if (tile instanceof TileActiveProviderChest) {
-			return activeProviders.remove(tile);
-		}
-		return false;
+	public final int priority;
+	
+	public ListWithPriority(int priority) {
+		this.priority = priority;
 	}
 	
 }

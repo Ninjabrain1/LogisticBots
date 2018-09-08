@@ -49,9 +49,11 @@ public interface INetwork {
 	 * Whether the INetwork can extract items from the storage unconditionally
 	 * @param priority
 	 * The storage's priority. The INetwork wants to extract from storages with low
-	 * priority and insert to storages with high priority.
+	 * priority and insert to storages with high priority. Exactly how the network
+	 * will handle priorities depends on the implementation.
 	 */
-	public void addStorage(INetworkStorage<? extends IStorable> storage, boolean openInput, boolean openOutput, int priority);
+	public void addStorage(INetworkStorage<? extends IStorable> storage, boolean openInput, boolean openOutput,
+			int priority);
 	
 	/**
 	 * Removes the storage from this network. It is adviced to not call this method
