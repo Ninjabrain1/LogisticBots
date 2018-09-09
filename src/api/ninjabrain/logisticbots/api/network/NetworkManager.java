@@ -99,7 +99,37 @@ public class NetworkManager {
 	 * The storage that should be removed
 	 */
 	public static void removeNetworkStorage(INetworkStorage<? extends IStorable> storage) {
-		storage.getNetwork().removeStorage(storage);
+		if (storage.getNetwork() != null)
+			storage.getNetwork().removeStorage(storage);
+	}
+	
+	/**
+	 * Creates a new {@link INetwork} according to provider.createNewNetwork(). If
+	 * the new network can merge with existing networks in its world they will
+	 * merge.
+	 * 
+	 * @return The INetwork the provider became a part of
+	 */
+	public static INetwork addNetworkProvider(INetworkProvider provider) {
+		INetwork newNetwork = provider.createNewNetwork();
+		for (INetwork network : NetworkManager.getNetworkCollection(provider.getWorld()).networkList) {
+			// TODO the provider might be able to merge with more than one network
+			if (newNetwork.canMerge(network) && network.canMerge(newNetwork)) {
+				network.merge(newNetwork);
+				return network;
+			}
+		}
+		return newNetwork;
+	}
+	
+	/**
+	 * Removes the given provider from its {@link INetwork}, possibly removing the
+	 * entire network if it was the only provider left in the network, or splitting
+	 * its network into two if the provider was the only link between them.
+	 */
+	public static void removeNetworkProvider(INetworkProvider provider) {
+		// No need to check if getNetwork() returns null, it should never return null
+		provider.getNetwork().removeProvider(provider);
 	}
 	
 	/**
