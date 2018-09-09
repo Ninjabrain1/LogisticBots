@@ -3,19 +3,20 @@ package ninjabrain.logisticbots.tile;
 import javax.annotation.Nullable;
 
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
-import ninjabrain.logisticbots.network.Network;
+import ninjabrain.logisticbots.api.network.INetwork;
+import ninjabrain.logisticbots.api.network.INetworkStorage;
+import ninjabrain.logisticbots.api.network.NetworkManager;
 
 /**
  * Simple inventory TileEntity with 54 item slots
  */
-public class TileSimpleInventory extends TileEntity {
+public class TileSimpleInventory extends TileEntity implements INetworkStorage {
 	
 	private static final int INVENTORY_SIZE = 54;
 	
@@ -23,7 +24,7 @@ public class TileSimpleInventory extends TileEntity {
 	
 	/** The Logistic Network this chest is connected to, null if none **/
 	@Nullable
-	protected Network network;
+	protected INetwork network;
 	
 	protected ItemStackHandler createItemStackHandler() {
 		return new ItemStackHandler(INVENTORY_SIZE);
@@ -32,7 +33,7 @@ public class TileSimpleInventory extends TileEntity {
 	@Override
 	public void onLoad() {
 		if (!world.isRemote)
-			network = Network.onTileCreated(this);
+			network = NetworkManager.addNetworkStorage(this, true, true, 0);
 	}
 	
 	@Override
@@ -42,7 +43,7 @@ public class TileSimpleInventory extends TileEntity {
 	
 	public void onRemove() {
 		if (!world.isRemote)
-			Network.onTileRemoved(this);
+			NetworkManager.removeNetworkStorage(this);
 	}
 	
 	@Override
@@ -73,7 +74,7 @@ public class TileSimpleInventory extends TileEntity {
 	/**
 	 * Returns the Logistic Network this chest is connected to, null if none
 	 */
-	public Network getNetwork() {
+	public INetwork getNetwork() {
 		return network;
 	}
 	
@@ -104,7 +105,7 @@ public class TileSimpleInventory extends TileEntity {
 	}
 	
 	@Override
-	public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt) {
+	public void onDataPacket(net.minecraft.network.NetworkManager net, SPacketUpdateTileEntity pkt) {
 		super.onDataPacket(net, pkt);
 		readPacketNBT(pkt.getNbtCompound());
 	}

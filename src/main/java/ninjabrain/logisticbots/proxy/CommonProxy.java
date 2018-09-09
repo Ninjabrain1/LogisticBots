@@ -36,6 +36,7 @@ import ninjabrain.logisticbots.tile.TileStorageChest;
 public class CommonProxy {
 	
 	public void preInit(FMLPreInitializationEvent event) {
+		// TODO set updateFrequency higher, value of 1 is only for debugging
 		registerEntity(LibNames.ENTITY_LOGISTICS_ROBOT, EntityLogisticRobot.class, 64, 1, false);
 		
 		registerTileEntity(TileRoboport.class, LibNames.BLOCK_ROBOPORT);
