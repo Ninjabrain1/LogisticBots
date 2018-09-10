@@ -6,16 +6,6 @@ package ninjabrain.logisticbots.api.network;
  */
 public interface INetwork {
 	
-	// /**
-	// * Loads this Network to the game
-	// */
-	// public void load();
-	//
-	// /**
-	// * Unloads this Network from the game
-	// */
-	// public void unload();
-	
 	/**
 	 * Called every tick of the world this Network is attached to. Attach a network
 	 * to a world by calling NetworkManager.addNetworkToWorld().

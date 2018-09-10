@@ -92,8 +92,6 @@ public class NetworkManager {
 	 */
 	public static void removeNetworkfromoWorld(INetwork network, World world) {
 		getNetworkCollection(world).networkList.remove(network);
-		// TODO add storages and transporters from network to unassigned
-		// storages/transporters
 	}
 	
 	/**

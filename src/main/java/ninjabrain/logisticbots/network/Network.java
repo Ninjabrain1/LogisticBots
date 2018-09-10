@@ -104,8 +104,6 @@ public class Network implements INetwork {
 		// TODO
 		NetworkManager.removeNetworkfromoWorld(this, world);
 		
-//		TransporterCollection unassignedTransporters = NetworkManager.getUnassignedTransporters(world);
-//		unassignedTransporters.transporterList.addAll(robots);
 		for (ITransporter<? extends IStorable> transporter : robots) {
 			transporter.setNetwork(NetworkManager.addTransporter(transporter));
 		}
@@ -162,25 +160,6 @@ public class Network implements INetwork {
 		return null;
 	}
 	
-//	/**
-//	 * Called whenever a EntityLogisticRobot is created or loaded in the server
-//	 * thread
-//	 */
-//	public void onRobotAdded(EntityLogisticRobot entity) {
-//		robots.add(entity);
-//	}
-//	
-//	/**
-//	 * Called whenever a EntityLogisticRobot is created or loaded in the server
-//	 * thread
-//	 */
-//	public void onRobotRemoved(EntityLogisticRobot entity) {
-//		if (!robots.remove(entity)) {
-//			LogisticBots.logger
-//					.error("Could not remove entity from Logistic Network, the entity is not a part of the network.");
-//		}
-//	}
-
 	@Override
 	public <T extends IStorable> boolean canAddTransporter(ITransporter<T> transporter) {
 		// TODO does this need to be offset by 0.5 block?

@@ -144,7 +144,7 @@ public class EntityLogisticRobot extends Entity implements ITransporter<LBItemSt
 		eta = eta == 0 ? 1 : eta;
 		ticks = 0;
 		Vec3d vel = desPos.subtract(startPos).normalize().scale(speed);
-		System.out.println("set task " + task);
+		
 		motionX = vel.x;
 		motionY = vel.y;
 		motionZ = vel.z;
