@@ -8,30 +8,49 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IWorldEventListener;
 import net.minecraft.world.World;
+import net.minecraftforge.event.world.WorldEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import ninjabrain.logisticbots.api.network.NetworkManager;
 import ninjabrain.logisticbots.entity.EntityLogisticRobot;
 
 /**
- * A Logistic Networks world event listener
+ * Listens to onEntityAdded/onEntityRemoved events to add/remove Logistic Robots
+ * from Logistic Networks.
  */
+@Mod.EventBusSubscriber
 public class NetworkWorldEventListener implements IWorldEventListener {
 	
-	Network network;
+	/**
+	 * Attaches an instance of this class to every server world that loads
+	 */
+	@SubscribeEvent
+	public static void onWorldLoad(WorldEvent.Load event) {
+		World world = event.getWorld();
+		if (!world.isRemote) {
+			world.addEventListener(new NetworkWorldEventListener(world));
+		}
+	}
 	
-	public NetworkWorldEventListener(Network network) {
-		this.network = network;
+	World world;
+	
+	public NetworkWorldEventListener(World world) {
+		this.world = world;
 	}
 	
 	@Override
 	public void onEntityAdded(Entity entityIn) {
+		// TODO can this cause a robot to be added multiple times?
 		if (entityIn instanceof EntityLogisticRobot) {
-			network.onRobotAdded((EntityLogisticRobot) entityIn);
+			NetworkManager.addTransporter((EntityLogisticRobot) entityIn);
 		}
 	}
 	
 	@Override
 	public void onEntityRemoved(Entity entityIn) {
+		// TODO should the robot really be removed from its network when it is unloaded?
 		if (entityIn instanceof EntityLogisticRobot) {
-			network.onRobotRemoved((EntityLogisticRobot) entityIn);
+			NetworkManager.removeTransporter((EntityLogisticRobot) entityIn);;
 		}
 	}
 	

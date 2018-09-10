@@ -1,7 +1,5 @@
 package ninjabrain.logisticbots.api.network;
 
-import net.minecraft.util.math.BlockPos;
-
 /**
  * A Logistics Network. Handles interactions between different types of
  * logistics chests and robots.
@@ -24,13 +22,6 @@ public interface INetwork {
 	 */
 	public void onUpdate();
 	
-	// Is this method really necessary or can it be replaced completely with
-	// canAddStorage()?
-	/**
-	 * Returns true if the given BlockPos is within this networks boundaries
-	 */
-	public boolean contains(BlockPos pos);
-	
 	/**
 	 * Returns true if the network can add the storage
 	 */
@@ -43,17 +34,8 @@ public interface INetwork {
 	 * 
 	 * @param storage
 	 * The storage that should be added
-	 * @param openInput
-	 * Whether the INetwork can insert items to the storage unconditionally
-	 * @param openOutput
-	 * Whether the INetwork can extract items from the storage unconditionally
-	 * @param priority
-	 * The storage's priority. The INetwork wants to extract from storages with low
-	 * priority and insert to storages with high priority. Exactly how the network
-	 * will handle priorities depends on the implementation.
 	 */
-	public void addStorage(INetworkStorage<? extends IStorable> storage, boolean openInput, boolean openOutput,
-			int priority);
+	public void addStorage(INetworkStorage<? extends IStorable> storage);
 	
 	/**
 	 * Removes the storage from this network. It is adviced to not call this method
@@ -76,18 +58,24 @@ public interface INetwork {
 	public void merge(INetwork network);
 	
 	/**
-	 * Removes the given provider from this network, possibly splitting
-	 * this network into two if the provider was the only link between them.
+	 * Removes the given provider from this network, possibly splitting this network
+	 * into two if the provider was the only link between them.
 	 */
 	public void removeProvider(INetworkProvider provider);
 	
 	/**
-	 * Adds the {@link ITransporter} to this network. 
+	 * Returns true if this INetwork can add the given {@link ITransporter} to this
+	 * network.
+	 */
+	public <T extends IStorable> boolean canAddTransporter(ITransporter<T> transporter);
+	
+	/**
+	 * Adds the {@link ITransporter} to this network.
 	 */
 	public <T extends IStorable> void addTransporter(ITransporter<T> transporter);
 	
 	/**
-	 * Removes the {@link ITransporter} from this network. 
+	 * Removes the {@link ITransporter} from this network.
 	 */
 	public void removeTransporter(ITransporter<? extends IStorable> transporter);
 	

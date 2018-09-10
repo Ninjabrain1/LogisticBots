@@ -4,7 +4,7 @@ package ninjabrain.logisticbots.api.network;
  * A component of a Logistic Network that can transport {@link IStorables} from
  * one {@link INetworkStorage} to another.
  */
-public interface ITransporter<T extends IStorable> {
+public interface ITransporter<T extends IStorable> extends INetworkComponent {
 	
 	/**
 	 * Inserts as much as possible of the given IStorable and returns a IStorable
