@@ -30,6 +30,10 @@ public class RenderLogisticRobot extends Render<EntityLogisticRobot> {
 	@Override
 	public void doRender(EntityLogisticRobot entity, double x, double y, double z, float entityYaw,
 			float partialTicks) {
+//		double partialTicksInv = 1.0 - partialTicks;
+//		x = entity.prevPosX * partialTicks + x * partialTicksInv;
+//		y = entity.prevPosY * partialTicks + y * partialTicksInv;
+//		z = entity.prevPosZ * partialTicks + z * partialTicksInv;
 		
 		mainModel.setClawAngles(entity.isCarryingSomething());
 		GlStateManager.pushMatrix();
@@ -73,7 +77,7 @@ public class RenderLogisticRobot extends Render<EntityLogisticRobot> {
 	private void renderItem(EntityLogisticRobot entity, double x, double y, double z, float entityYaw,
 			float partialTicks) {
 		RenderItem itemRenderer = Minecraft.getMinecraft().getRenderItem();
-		ItemStack itemstack = entity.getInventoryStack();
+		ItemStack itemstack = entity.getItemStack();
 		int i = itemstack.isEmpty() ? 187 : Item.getIdFromItem(itemstack.getItem()) + itemstack.getMetadata();
 		random.setSeed((long) i);
 		
@@ -123,7 +127,7 @@ public class RenderLogisticRobot extends Render<EntityLogisticRobot> {
 	
 	private int transformModelCount(EntityLogisticRobot entity, double x, double y, double z, float partialTicks,
 			IBakedModel iBakedModel) {
-		ItemStack itemstack = entity.getInventoryStack();
+		ItemStack itemstack = entity.getItemStack();
 		Item item = itemstack.getItem();
 		
 		if (item == null) {

@@ -12,11 +12,12 @@ import net.minecraftforge.items.ItemStackHandler;
 import ninjabrain.logisticbots.api.network.INetwork;
 import ninjabrain.logisticbots.api.network.INetworkStorage;
 import ninjabrain.logisticbots.api.network.NetworkManager;
+import ninjabrain.logisticbots.network.LBItemStack;
 
 /**
  * Simple inventory TileEntity with 54 item slots
  */
-public class TileSimpleInventory extends TileEntity implements INetworkStorage {
+public class TileSimpleInventory extends TileEntity implements INetworkStorage<LBItemStack> {
 	
 	private static final int INVENTORY_SIZE = 54;
 	
@@ -33,7 +34,7 @@ public class TileSimpleInventory extends TileEntity implements INetworkStorage {
 	@Override
 	public void onLoad() {
 		if (!world.isRemote)
-			network = NetworkManager.addNetworkStorage(this, true, true, 0);
+			NetworkManager.addNetworkStorage(this);
 	}
 	
 	@Override
@@ -41,6 +42,9 @@ public class TileSimpleInventory extends TileEntity implements INetworkStorage {
 		onRemove();
 	}
 	
+	/**
+	 * Called when this block is broken or unloaded
+	 */
 	public void onRemove() {
 		if (!world.isRemote)
 			NetworkManager.removeNetworkStorage(this);
@@ -74,8 +78,29 @@ public class TileSimpleInventory extends TileEntity implements INetworkStorage {
 	/**
 	 * Returns the Logistic Network this chest is connected to, null if none
 	 */
+	@Override
 	public INetwork getNetwork() {
 		return network;
+	}
+	
+	@Override
+	public void setNetwork(INetwork network) {
+		this.network = network;
+	}
+	
+	@Override
+	public boolean hasOpenInput() {
+		return true;
+	}
+
+	@Override
+	public boolean hasOpenOutput() {
+		return true;
+	}
+
+	@Override
+	public int getPriority() {
+		return 0;
 	}
 	
 	// ################################################################# //

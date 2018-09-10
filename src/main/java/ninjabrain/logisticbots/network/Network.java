@@ -5,12 +5,12 @@ import java.util.List;
 
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import ninjabrain.logisticbots.LogisticBots;
 import ninjabrain.logisticbots.api.network.INetwork;
+import ninjabrain.logisticbots.api.network.INetworkProvider;
 import ninjabrain.logisticbots.api.network.INetworkStorage;
 import ninjabrain.logisticbots.api.network.IStorable;
+import ninjabrain.logisticbots.api.network.ITransporter;
 import ninjabrain.logisticbots.api.network.NetworkManager;
-import ninjabrain.logisticbots.entity.EntityLogisticRobot;
 
 /**
  * A Logistics Network. Handles interactions between different types of
@@ -20,9 +20,7 @@ public class Network implements INetwork {
 	
 	protected final World world;
 	
-	protected final ArrayList<EntityLogisticRobot> robots;
-	
-	protected final ArrayList<Task> tasks;
+	protected final ArrayList<ITransporter<? extends IStorable>> robots, robotsToAdd, robotsToRemove;
 	
 	/**
 	 * Each entry in this List is a List of storages that all have the same
@@ -38,56 +36,35 @@ public class Network implements INetwork {
 	 */
 	public Network(World world) {
 		this.world = world;
-		robots = new ArrayList<EntityLogisticRobot>();
-		tasks = new ArrayList<Task>();
 		
-		storages = new ArrayList<ListWithPriority<INetworkStorage<?>>>();
+		robots = new ArrayList<ITransporter<? extends IStorable>>();
+		robotsToAdd = new ArrayList<ITransporter<? extends IStorable>>();
+		robotsToRemove = new ArrayList<ITransporter<? extends IStorable>>();
 		
-		world.addEventListener(new NetworkWorldEventListener(this));
-	}
-	
-	@Override
-	public void load() {
+		storages = new ArrayList<ListWithPriority<INetworkStorage<? extends IStorable>>>();
+		
 		NetworkManager.addNetworkToWorld(this, world);
 	}
 	
 	@Override
-	public void unload() {
-		NetworkManager.removeNetworkfromoWorld(this, world);
-	}
-	
-	@Override
 	public void onUpdate() {
-		
-//		System.out.println(storages.get(0).size());
-		
-//		getStoragesFromPriority(-20, true);
-//		getStoragesFromPriority(3, true);
-//		getStoragesFromPriority(100, true);
-//		getStoragesFromPriority(3, true);
-//		getStoragesFromPriority(1, true);
-//		getStoragesFromPriority(2, true);
-//		getStoragesFromPriority(-1, true);
-		
-		String s = "";
-		for (ListWithPriority<INetworkStorage<? extends IStorable>> storageList : storages) {
-			s += " " + storageList.priority;
+		// TODO use lambda or a traditional for loop?
+		robots.forEach(robot -> robot.updateTask());
+//		for(ITransporter<? extends IStorable> robot : robots) {
+//			robot.updateTask();
+//		}
+		for (ITransporter<? extends IStorable> toRemove : robotsToRemove) {
+			robots.remove(toRemove);
 		}
-		System.out.println(((ListWithPriority)getStoragesFromPriority(-3, false)).priority);
+		robotsToRemove.clear();
+		for (ITransporter<? extends IStorable> toAdd : robotsToAdd) {
+			robots.add(toAdd);
+		}
+		robotsToAdd.clear();
 		
-		// tasks.removeIf(task -> task.update());
-		
-		// if (tasks.size() == 0 && robots.size() > 0 && storages.size() > 0 &&
-		// activeProviders.size() > 0) {
-		// tasks.add(new Task(activeProviders.get(0), storages.get(0), robots.get(0)));
-		// }
-		
-		// LogisticBots.logger.info("Network:" + networks.indexOf(this) + ", Robots:" +
-		// robots.size() + ", storages:"
-		// + storages.size() + ", active roviders:" + activeProviders.size());
+//		System.out.println("Robots: " + robots.size() + ", Storages: " + getNumberOfStorages());
 	}
 	
-	@Override
 	public boolean contains(BlockPos pos) {
 		return true;
 	}
@@ -98,9 +75,9 @@ public class Network implements INetwork {
 	}
 	
 	@Override
-	public void addStorage(INetworkStorage<? extends IStorable> storage, boolean openInput, boolean openOutput,
-			int priority) {
-		getStoragesFromPriority(priority, true).add(storage);
+	public void addStorage(INetworkStorage<? extends IStorable> storage) {
+		// TODO open input / open output
+		getStoragesFromPriority(storage.getPriority(), true).add(storage);
 	}
 	
 	@Override
@@ -109,6 +86,49 @@ public class Network implements INetwork {
 			if (storageList.remove(storage))
 				return;
 		}
+	}
+	
+	@Override
+	public boolean canMerge(INetwork network) {
+		// TODO
+		return false;
+	}
+	
+	@Override
+	public void merge(INetwork network) {
+		// TODO
+	}
+	
+	@Override
+	public void removeProvider(INetworkProvider provider) {
+		// TODO
+		NetworkManager.removeNetworkfromoWorld(this, world);
+		
+		for (ITransporter<? extends IStorable> transporter : robots) {
+			transporter.setNetwork(NetworkManager.addTransporter(transporter));
+		}
+		
+		List<INetworkStorage<? extends IStorable>> storagesAsList = getStoragesAsList();
+		for (INetworkStorage<? extends IStorable> storage : storagesAsList) {
+			storage.setNetwork(NetworkManager.addNetworkStorage(storage));
+		}
+		
+	}
+	
+	protected int getNumberOfStorages() {
+		int i = 0;
+		for (ListWithPriority<INetworkStorage<? extends IStorable>> storageList : storages) {
+			i += storageList.size();
+		}
+		return i;
+	}
+	
+	protected List<INetworkStorage<? extends IStorable>> getStoragesAsList() {
+		List<INetworkStorage<? extends IStorable>> ret = new ArrayList<INetworkStorage<? extends IStorable>>();
+		for (ListWithPriority<INetworkStorage<? extends IStorable>> storageList : storages) {
+			ret.addAll(storageList);
+		}
+		return ret;
 	}
 	
 	/**
@@ -140,25 +160,23 @@ public class Network implements INetwork {
 		return null;
 	}
 	
-	/**
-	 * Called whenever a EntityLogisticRobot is created or loaded in the server
-	 * thread
-	 */
-	public void onRobotAdded(EntityLogisticRobot entity) {
-		robots.add(entity);
+	@Override
+	public <T extends IStorable> boolean canAddTransporter(ITransporter<T> transporter) {
+		// TODO does this need to be offset by 0.5 block?
+		return contains(new BlockPos(transporter.getPos()));
 	}
 	
-	/**
-	 * Called whenever a EntityLogisticRobot is created or loaded in the server
-	 * thread
-	 */
-	public void onRobotRemoved(EntityLogisticRobot entity) {
-		if (!robots.remove(entity)) {
-			LogisticBots.logger
-					.error("Could not remove entity from Logistic Network, the entity is not a part of the network.");
-		}
+	@Override
+	public <T extends IStorable> void addTransporter(ITransporter<T> transporter) {
+		robotsToAdd.add(transporter);
+		transporter.setTask(new TaskMovement<T>(new BlockPos(1000, 10, 0)));
 	}
 	
+	@Override
+	public void removeTransporter(ITransporter<? extends IStorable> transporter) {
+		robotsToRemove.add(transporter);
+	}
+
 }
 
 class ListWithPriority<E> extends ArrayList<E> {
