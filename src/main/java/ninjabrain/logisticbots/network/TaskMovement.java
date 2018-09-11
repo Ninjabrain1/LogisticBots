@@ -11,6 +11,7 @@ import ninjabrain.logisticbots.api.network.ITransporter;
 public class TaskMovement<T extends IStorable> implements ITask<T> {
 	
 	BlockPos pos;
+	ITask<T> nextTask;
 	
 	public TaskMovement(BlockPos pos) {
 		this.pos = pos;
@@ -28,7 +29,12 @@ public class TaskMovement<T extends IStorable> implements ITask<T> {
 	
 	@Override
 	public ITask<T> getNextTask() {
-		return null;
+		return nextTask;
+	}
+	
+	@Override
+	public void setNextTask(ITask<T> task) {
+		this.nextTask = task;
 	}
 	
 }

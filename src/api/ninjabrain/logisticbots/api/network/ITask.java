@@ -22,9 +22,15 @@ public interface ITask<T extends IStorable> {
 	public void onComplete(ITransporter<T> transporter);
 	
 	/**
-	 * Returns the next task for the transporter that is should complete after this
+	 * Returns the next task for the transporter that should be complete after this
 	 * task is completed. Returns null if no other task should be completed.
 	 */
 	public ITask<T> getNextTask();
+	
+	/**
+	 * Sets the next task for the transporter that should be complete after this
+	 * task is completed.
+	 */
+	public void setNextTask(ITask<T> task);
 	
 }

@@ -28,7 +28,7 @@ public class EntityLogisticRobot extends Entity implements ITransporter<LBItemSt
 	protected ITask<LBItemStack> task;
 	
 	/** The speed of Logistic Robots in Blocks/tick */
-	protected static float speed = 1f / 5f;
+	protected static float speed = 0.3f;
 	
 	public EntityLogisticRobot(World worldIn) {
 		super(worldIn);
@@ -98,7 +98,7 @@ public class EntityLogisticRobot extends Entity implements ITransporter<LBItemSt
 	 * Returns the max speed of this Logistic Robot in Blocks/tick
 	 */
 	public float getSpeed() {
-		return speed*10;
+		return speed;
 	}
 	
 	@Override
@@ -109,7 +109,12 @@ public class EntityLogisticRobot extends Entity implements ITransporter<LBItemSt
 	
 	@Override
 	public LBItemStack extract(LBItemStack storable, boolean simulate) {
-		int amount = storable.getStack().getCount();
+		int amount;
+		if (storable == LBItemStack.ANY_STACK) {
+			amount = Integer.MAX_VALUE; 
+		} else {
+			amount = storable.getStack().getCount();
+		}
 		ItemStack extracted = itemHandler.extractItem(0, amount, simulate);
 		return new LBItemStack(extracted);
 	}

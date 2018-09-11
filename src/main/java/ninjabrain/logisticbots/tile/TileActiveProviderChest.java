@@ -10,5 +10,20 @@ public class TileActiveProviderChest extends TileSimpleInventory {
 	public String getGUIName() {
 		return I18n.format(BlockLogisticChest.getUnlocalizedName(ChestType.ACTIVEPROVIDERCHEST) + ".name");
 	}
+
+	@Override
+	public boolean hasOpenInput() {
+		return false;
+	}
+
+	@Override
+	public boolean hasOpenOutput() {
+		return true;
+	}
+
+	@Override
+	public int getPriority() {
+		return -1;
+	}
 	
 }

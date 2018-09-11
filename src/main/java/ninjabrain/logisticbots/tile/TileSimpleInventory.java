@@ -17,11 +17,11 @@ import ninjabrain.logisticbots.network.LBItemStack;
 /**
  * Simple inventory TileEntity with 54 item slots
  */
-public class TileSimpleInventory extends TileEntity implements INetworkStorage<LBItemStack> {
+public abstract class TileSimpleInventory extends TileEntity implements INetworkStorage<LBItemStack> {
 	
 	private static final int INVENTORY_SIZE = 54;
 	
-	protected ItemStackHandler itemStackHandler = createItemStackHandler();
+	protected ItemStackHandler itemHandler = createItemStackHandler();
 	
 	/** The Logistic Network this chest is connected to, null if none **/
 	@Nullable
@@ -58,12 +58,12 @@ public class TileSimpleInventory extends TileEntity implements INetworkStorage<L
 	@Override
 	public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
 		if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
-			return CapabilityItemHandler.ITEM_HANDLER_CAPABILITY.cast(itemStackHandler);
+			return CapabilityItemHandler.ITEM_HANDLER_CAPABILITY.cast(itemHandler);
 		return super.getCapability(capability, facing);
 	}
 	
 	public ItemStackHandler getItemStackHandler() {
-		return itemStackHandler;
+		return itemHandler;
 	}
 	
 	/**
@@ -71,13 +71,8 @@ public class TileSimpleInventory extends TileEntity implements INetworkStorage<L
 	 * the player opens this inventorys GUI. This is usually the same as the name of
 	 * the block this tile should be attached to.
 	 */
-	public String getGUIName() {
-		return "";
-	}
+	public abstract String getGUIName();
 	
-	/**
-	 * Returns the Logistic Network this chest is connected to, null if none
-	 */
 	@Override
 	public INetwork getNetwork() {
 		return network;
@@ -89,18 +84,13 @@ public class TileSimpleInventory extends TileEntity implements INetworkStorage<L
 	}
 	
 	@Override
-	public boolean hasOpenInput() {
-		return true;
+	public LBItemStack insert(LBItemStack storable, boolean simulate) {
+		return LBItemStack.insert(itemHandler, storable, simulate);
 	}
-
+	
 	@Override
-	public boolean hasOpenOutput() {
-		return true;
-	}
-
-	@Override
-	public int getPriority() {
-		return 0;
+	public LBItemStack extract(LBItemStack storable, boolean simulate) {
+		return LBItemStack.extract(itemHandler, storable, simulate);
 	}
 	
 	// ################################################################# //
@@ -121,12 +111,12 @@ public class TileSimpleInventory extends TileEntity implements INetworkStorage<L
 	}
 	
 	public void writePacketNBT(NBTTagCompound compound) {
-		compound.merge(itemStackHandler.serializeNBT());
+		compound.merge(itemHandler.serializeNBT());
 	}
 	
 	public void readPacketNBT(NBTTagCompound compound) {
-		itemStackHandler = createItemStackHandler();
-		itemStackHandler.deserializeNBT(compound);
+		itemHandler = createItemStackHandler();
+		itemHandler.deserializeNBT(compound);
 	}
 	
 	@Override

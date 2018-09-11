@@ -10,5 +10,20 @@ public class TileStorageChest extends TileSimpleInventory {
 	public String getGUIName() {
 		return I18n.format(BlockLogisticChest.getUnlocalizedName(ChestType.STORAGECHEST) + ".name");
 	}
+
+	@Override
+	public boolean hasOpenInput() {
+		return true;
+	}
+
+	@Override
+	public boolean hasOpenOutput() {
+		return true;
+	}
+
+	@Override
+	public int getPriority() {
+		return 0;
+	}
 	
 }
