@@ -23,7 +23,7 @@ public class EntityLogisticRobot extends Entity implements ITransporter<LBItemSt
 	
 	protected static final String TAG_INVENTORY = "invStack";
 	
-	protected INetwork network;
+	protected INetwork<LBItemStack> network;
 	protected ItemStackHandler itemHandler = createItemStackHandler();
 	protected ITask<LBItemStack> task;
 	
@@ -177,13 +177,18 @@ public class EntityLogisticRobot extends Entity implements ITransporter<LBItemSt
 	}
 
 	@Override
-	public INetwork getNetwork() {
+	public INetwork<LBItemStack> getNetwork() {
 		return network;
 	}
 
 	@Override
-	public void setNetwork(INetwork network) {
+	public void setNetwork(INetwork<LBItemStack> network) {
 		this.network = network;
+	}
+	
+	@Override
+	public Class<LBItemStack> getType() {
+		return LBItemStack.class;
 	}
 	
 	/**

@@ -4,14 +4,15 @@ import net.minecraft.tileentity.TileEntity;
 import ninjabrain.logisticbots.api.network.INetwork;
 import ninjabrain.logisticbots.api.network.INetworkProvider;
 import ninjabrain.logisticbots.api.network.NetworkManager;
+import ninjabrain.logisticbots.network.LBItemStack;
 import ninjabrain.logisticbots.network.Network;
 
 /**
  * Roboport tile entity that contains a Logistic Network
  */
-public class TileRoboport extends TileEntity implements INetworkProvider {
+public class TileRoboport extends TileEntity implements INetworkProvider<LBItemStack> {
 	
-	INetwork network;
+	INetwork<LBItemStack> network;
 	
 	@Override
 	public void onLoad() {
@@ -34,18 +35,23 @@ public class TileRoboport extends TileEntity implements INetworkProvider {
 	}
 
 	@Override
-	public INetwork getNetwork() {
+	public INetwork<LBItemStack> getNetwork() {
 		return network;
 	}
 	
 	@Override
-	public void setNetwork(INetwork network) {
+	public void setNetwork(INetwork<LBItemStack> network) {
 		this.network = network;
 	}
 
 	@Override
-	public INetwork createNewNetwork() {
+	public INetwork<LBItemStack> createNewNetwork() {
 		return new Network(world);
+	}
+	
+	@Override
+	public Class<LBItemStack> getType() {
+		return LBItemStack.class;
 	}
 	
 }

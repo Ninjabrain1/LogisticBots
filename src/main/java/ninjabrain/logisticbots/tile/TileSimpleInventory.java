@@ -27,7 +27,7 @@ public abstract class TileSimpleInventory extends TileEntity implements INetwork
 	
 	/** The Logistic Network this chest is connected to, null if none **/
 	@Nullable
-	protected INetwork network;
+	protected INetwork<LBItemStack> network;
 	
 	protected ItemStackHandler createItemStackHandler() {
 		return new ItemStackHandler(INVENTORY_SIZE);
@@ -76,12 +76,12 @@ public abstract class TileSimpleInventory extends TileEntity implements INetwork
 	public abstract String getGUIName();
 	
 	@Override
-	public INetwork getNetwork() {
+	public INetwork<LBItemStack> getNetwork() {
 		return network;
 	}
 	
 	@Override
-	public void setNetwork(INetwork network) {
+	public void setNetwork(INetwork<LBItemStack> network) {
 		this.network = network;
 		if (network != null)
 			network.addWanted(this, new LBItemStack(new ItemStack(ModItems.logisticsRobot)));
@@ -100,6 +100,11 @@ public abstract class TileSimpleInventory extends TileEntity implements INetwork
 	@Override
 	public LBItemStack extract(LBItemStack storable, boolean simulate) {
 		return LBItemStack.extract(itemHandler, storable, simulate);
+	}
+	
+	@Override
+	public Class<LBItemStack> getType() {
+		return LBItemStack.class;
 	}
 	
 	// ################################################################# //

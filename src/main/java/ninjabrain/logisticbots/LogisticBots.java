@@ -9,8 +9,10 @@ import net.minecraftforge.fml.common.Mod.Instance;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import ninjabrain.logisticbots.api.network.NetworkManager;
 import ninjabrain.logisticbots.item.ModCreativeTab;
 import ninjabrain.logisticbots.lib.LibMod;
+import ninjabrain.logisticbots.network.LBItemStack;
 import ninjabrain.logisticbots.proxy.CommonProxy;
 
 @Mod(modid = LibMod.MODID, name = LibMod.NAME, version = LibMod.VERSION)
@@ -35,6 +37,8 @@ public class LogisticBots {
 	@EventHandler
 	public void init(FMLInitializationEvent event) {
 		proxy.init(event);
+		
+		NetworkManager.registerType(LBItemStack.class);
 	}
 	
 	// TODO add tooltips describing what each chest does

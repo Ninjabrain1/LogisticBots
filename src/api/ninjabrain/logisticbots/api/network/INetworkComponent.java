@@ -3,7 +3,7 @@ package ninjabrain.logisticbots.api.network;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public interface INetworkComponent {
+public interface INetworkComponent<T extends IStorable> {
 	
 	/**
 	 * Returns the world this storage is in
@@ -13,12 +13,12 @@ public interface INetworkComponent {
 	/**
 	 * Returns the INetwork this storage belongs to, null if none
 	 */
-	public INetwork getNetwork();
+	public INetwork<T> getNetwork();
 	
 	/**
 	 * Sets the INetwork this storage belongs to
 	 */
-	public void setNetwork(INetwork network);
+	public void setNetwork(INetwork<T> network);
 	
 	/**
 	 * Returns the position of this component in the world.

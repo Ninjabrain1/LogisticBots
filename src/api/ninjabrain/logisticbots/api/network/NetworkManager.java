@@ -1,7 +1,9 @@
 package ninjabrain.logisticbots.api.network;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 import net.minecraft.world.World;
 import net.minecraft.world.WorldProvider;
@@ -24,6 +26,16 @@ public class NetworkManager {
 	private static final String UNASSIGNED_TRANSPORTERS_DATA_IDENTIFIER = "LB_loneTransporters";
 	// All INetworkStorages that have not been assigned to a network
 	private static final String UNASSIGNED_STORAGES_DATA_IDENTIFIER = "LB_loneStorages";
+	
+	/**
+	 * Types of IStorables that Logistic Networks can store/transport. Register a
+	 * type using {@link NetworkManager#registerType(Class)} during init.
+	 **/
+	public static final List<Class<? extends IStorable>> storableTypes = new ArrayList<Class<? extends IStorable>>();
+	
+	public static void registerType(Class<? extends IStorable> type) {
+		storableTypes.add(type);
+	}
 	
 	/**
 	 * Attaches a {@link NetworkCollection} to every server world that loads
@@ -50,8 +62,12 @@ public class NetworkManager {
 	@SubscribeEvent
 	public static void onWorldTick(WorldTickEvent event) {
 		if (!event.world.isRemote && event.phase == Phase.END) {
-			Collection<INetwork> networkCollection = getNetworkCollection(event.world).networkList;
-			networkCollection.forEach(network -> network.onUpdate());
+			NetworkCollection netCol = getNetworkCollection(event.world);
+			Collection<NetworkList<? extends IStorable>> networkLists = netCol.networkMap.values();
+			for (NetworkList<? extends IStorable> networkList : networkLists) {
+				// Is it OK to use lambda here?
+				networkList.forEach(network -> network.onUpdate());
+			}
 		}
 		
 	}
@@ -60,25 +76,26 @@ public class NetworkManager {
 	 * Attaches a network to a world. This will cause the network to update each
 	 * tick.
 	 */
-	public static void addNetworkToWorld(INetwork network, World world) {
-		Collection<INetwork> networkCollection = getNetworkCollection(world).networkList;
-		if (!networkCollection.contains(network)) {
-			networkCollection.add(network);
+	public static <T extends IStorable> void addNetworkToWorld(INetwork<T> network, World world) {
+		Class<T> type = network.getType();
+		NetworkList<T> networkList = getNetworkList(world, type);
+		if (!networkList.contains(network)) {
+			networkList.add(network);
 		}
-		TransporterCollection unassignedTransporters = getUnassignedTransporters(world);
-		StorageCollection unassignedStorages = getUnassignedStorages(world);
-		Iterator<ITransporter<? extends IStorable>> transpIterator = unassignedTransporters.transporterList.iterator();
+		TransporterList<T> unassTransp = getUnassignedTransporters(world, type);
+		StorageList<T> unassStorag = getUnassignedStorages(world, type);
+		Iterator<ITransporter<T>> transpIterator = unassTransp.iterator();
 		while (transpIterator.hasNext()) {
-			ITransporter<? extends IStorable> transporter = transpIterator.next();
+			ITransporter<T> transporter = transpIterator.next();
 			if (network.canAddTransporter(transporter)) {
 				network.addTransporter(transporter);
 				transporter.setNetwork(network);
 				transpIterator.remove();
 			}
 		}
-		Iterator<INetworkStorage<? extends IStorable>> storageIterator = unassignedStorages.storageList.iterator();
+		Iterator<INetworkStorage<T>> storageIterator = unassStorag.iterator();
 		while (storageIterator.hasNext()) {
-			INetworkStorage<? extends IStorable> storage = storageIterator.next();
+			INetworkStorage<T> storage = storageIterator.next();
 			if (network.canAddStorage(storage)) {
 				network.addStorage(storage);
 				storage.setNetwork(network);
@@ -90,8 +107,8 @@ public class NetworkManager {
 	/**
 	 * Removes a network from a world.
 	 */
-	public static void removeNetworkfromoWorld(INetwork network, World world) {
-		getNetworkCollection(world).networkList.remove(network);
+	public static void removeNetworkfromoWorld(INetwork<?> network, World world) {
+		getNetworkList(world, network.getType()).remove(network);
 	}
 	
 	/**
@@ -101,15 +118,16 @@ public class NetworkManager {
 	 * @return The INetwork the storage was added to, null if it was not added to a
 	 * network
 	 */
-	public static INetwork addNetworkStorage(INetworkStorage<? extends IStorable> storage) {
-		for (INetwork network : NetworkManager.getNetworkCollection(storage.getWorld()).networkList) {
+	public static <T extends IStorable> INetwork<T> addNetworkStorage(INetworkStorage<T> storage) {
+		Class<T> type = storage.getType();
+		for (INetwork<T> network : NetworkManager.getNetworkList(storage.getWorld(), type)) {
 			if (network.canAddStorage(storage)) {
 				network.addStorage(storage);
 				storage.setNetwork(network);
 				return network;
 			}
 		}
-		getUnassignedStorages(storage.getWorld()).storageList.add(storage);
+		getUnassignedStorages(storage.getWorld(), type).add(storage);
 		return null;
 	}
 	
@@ -117,11 +135,11 @@ public class NetworkManager {
 	 * Removes the given storage from the world, it can no longer be interacted with
 	 * by INetworks.
 	 */
-	public static void removeNetworkStorage(INetworkStorage<? extends IStorable> storage) {
+	public static <T extends IStorable> void removeNetworkStorage(INetworkStorage<T> storage) {
 		if (storage.getNetwork() != null) {
 			storage.getNetwork().removeStorage(storage);
 		} else {
-			getUnassignedStorages(storage.getWorld()).storageList.remove(storage);
+			getUnassignedStorages(storage.getWorld(), storage.getType()).remove(storage);
 		}
 	}
 	
@@ -132,15 +150,16 @@ public class NetworkManager {
 	 * @return The INetwork the storage was added to, null if it was not added to a
 	 * network
 	 */
-	public static INetwork addTransporter(ITransporter<? extends IStorable> transporter) {
-		for (INetwork network : NetworkManager.getNetworkCollection(transporter.getWorld()).networkList) {
+	public static <T extends IStorable> INetwork<T> addTransporter(ITransporter<T> transporter) {
+		Class<T> type = transporter.getType();
+		for (INetwork<T> network : NetworkManager.getNetworkList(transporter.getWorld(), type)) {
 			if (network.canAddTransporter(transporter)) {
 				network.addTransporter(transporter);
 				transporter.setNetwork(network);
 				return network;
 			}
 		}
-		getUnassignedTransporters(transporter.getWorld()).transporterList.add(transporter);
+		getUnassignedTransporters(transporter.getWorld(), type).add(transporter);
 		return null;
 	}
 	
@@ -148,11 +167,11 @@ public class NetworkManager {
 	 * Removes the given storage from the world, it can no longer be interacted with
 	 * by INetworks.
 	 */
-	public static void removeTransporter(ITransporter<? extends IStorable> transporter) {
+	public static <T extends IStorable> void removeTransporter(ITransporter<T> transporter) {
 		if (transporter.getNetwork() != null) {
 			transporter.getNetwork().removeTransporter(transporter);
 		} else {
-			getUnassignedTransporters(transporter.getWorld()).transporterList.remove(transporter);
+			getUnassignedTransporters(transporter.getWorld(), transporter.getType()).remove(transporter);
 		}
 	}
 	
@@ -163,9 +182,10 @@ public class NetworkManager {
 	 * 
 	 * @return The INetwork the provider became a part of
 	 */
-	public static INetwork addNetworkProvider(INetworkProvider provider) {
-		INetwork newNetwork = provider.createNewNetwork();
-		for (INetwork network : NetworkManager.getNetworkCollection(provider.getWorld()).networkList) {
+	public static <T extends IStorable> INetwork<T> addNetworkProvider(INetworkProvider<T> provider) {
+		INetwork<T> newNetwork = provider.createNewNetwork();
+		NetworkList<T> networkList = getNetworkList(provider.getWorld(), provider.getType());
+		for (INetwork<T> network : networkList) {
 			// TODO the provider might be able to merge with more than one network
 			if (newNetwork.canMerge(network) && network.canMerge(newNetwork)) {
 				network.merge(newNetwork);
@@ -180,7 +200,7 @@ public class NetworkManager {
 	 * entire network if it was the only provider left in the network, or splitting
 	 * its network into two if the provider was the only link between them.
 	 */
-	public static void removeNetworkProvider(INetworkProvider provider) {
+	public static <T extends IStorable> void removeNetworkProvider(INetworkProvider<T> provider) {
 		// No need to check if getNetwork() returns null, it should never return null
 		provider.getNetwork().removeProvider(provider);
 	}
@@ -194,22 +214,30 @@ public class NetworkManager {
 	}
 	
 	/**
-	 * Returns the {@link TransporterCollection} of unassigned transporters in the
-	 * given world
+	 * Returns the list of networks of the given type that is attached to the given
+	 * world
 	 */
-	public static TransporterCollection getUnassignedTransporters(World world) {
-		String identifier = getUnassignedTransportersIdentifier(world.provider);
-		return (TransporterCollection) world.getPerWorldStorage().getOrLoadData(TransporterCollection.class,
-				identifier);
+	public static <T extends IStorable> NetworkList<T> getNetworkList(World world, Class<T> type) {
+		return getNetworkCollection(world).getListFromType(type);
 	}
 	
 	/**
-	 * Returns the {@link StorageCollection} of unassigned storages in the given
+	 * Returns the list of unassigned transporters of the given type in the given
 	 * world
 	 */
-	public static StorageCollection getUnassignedStorages(World world) {
+	public static <T extends IStorable> TransporterList<T> getUnassignedTransporters(World world, Class<T> type) {
+		String identifier = getUnassignedTransportersIdentifier(world.provider);
+		return ((TransporterCollection) world.getPerWorldStorage().getOrLoadData(TransporterCollection.class,
+				identifier)).getListFromType(type);
+	}
+	
+	/**
+	 * Returns the list of unassigned storages of the given type in the given world
+	 */
+	public static <T extends IStorable> StorageList<T> getUnassignedStorages(World world, Class<T> type) {
 		String identifier = getUnassignedStoragesIdentifier(world.provider);
-		return (StorageCollection) world.getPerWorldStorage().getOrLoadData(StorageCollection.class, identifier);
+		return ((StorageCollection) world.getPerWorldStorage().getOrLoadData(StorageCollection.class, identifier))
+				.getListFromType(type);
 	}
 	
 	private static String getNetworkCollectionIdentifier(WorldProvider provider) {

@@ -1,7 +1,8 @@
 package ninjabrain.logisticbots.api.network;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.storage.WorldSavedData;
@@ -12,12 +13,21 @@ import net.minecraft.world.storage.WorldSavedData;
 public class TransporterCollection extends WorldSavedData {
 	
 	/**
-	 * A list of all Logistic Networks in the world this is attached to
+	 * A Map of all unassigned ITransporters in the world this is attached to
 	 */
-	public final Collection<ITransporter<? extends IStorable>> transporterList = new ArrayList<ITransporter<? extends IStorable>>();
+	public final Map<Class<? extends IStorable>, TransporterList<? extends IStorable>> transporterMap;
 	
 	TransporterCollection(String name) {
 		super(name);
+		transporterMap = new HashMap<Class<? extends IStorable>, TransporterList<? extends IStorable>>();
+		for (Class<? extends IStorable> clazz : NetworkManager.storableTypes) {
+			transporterMap.put(clazz, new TransporterList<>());
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	public <T extends IStorable> TransporterList<T> getListFromType(Class<T> type) {
+		return (TransporterList<T>) transporterMap.get(type);
 	}
 	
 	@Override
@@ -30,5 +40,10 @@ public class TransporterCollection extends WorldSavedData {
 		// Nothing needs saving yet
 		return null;
 	}
+	
+}
+class TransporterList<T extends IStorable> extends ArrayList<ITransporter<T>> {
+
+	private static final long serialVersionUID = -2010520254269983260L;
 	
 }

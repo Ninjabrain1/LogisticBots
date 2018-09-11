@@ -3,12 +3,11 @@ package ninjabrain.logisticbots.api.network;
 /**
  * A component of a Logistic Network that stores things. To notify the world,
  * and all Logistic Networks, that an instance of your INetworkStorage has been
- * created call
- * {@link NetworkManager#addNetworkStorage(INetworkStorage)}.
+ * created call {@link NetworkManager#addNetworkStorage(INetworkStorage)}.
  * Remember to call {@link NetworkManager#removeNetworkStorage(INetworkStorage)}
  * when the implementer of this interface is removed from the world.
  */
-public interface INetworkStorage<T extends IStorable> extends INetworkComponent, INetworkInventory<T> {
+public interface INetworkStorage<T extends IStorable> extends INetworkComponent<T>, INetworkInventory<T> {
 	
 	/**
 	 * Whether the INetwork can insert items to the storage unconditionally. It is
@@ -29,5 +28,10 @@ public interface INetworkStorage<T extends IStorable> extends INetworkComponent,
 	 * that the priority does not change over time.
 	 */
 	public int getPriority();
+	
+	/**
+	 * Returns the type of IStorable this can store.
+	 */
+	public Class<T> getType();
 	
 }
