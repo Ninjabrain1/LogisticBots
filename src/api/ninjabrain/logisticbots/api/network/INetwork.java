@@ -69,4 +69,16 @@ public interface INetwork {
 	 */
 	public void removeTransporter(ITransporter<? extends IStorable> transporter);
 	
+	/**
+	 * Tells the network that the given storage wants the given storable delivered
+	 * to it.
+	 */
+	public <T extends IStorable> void addWanted(INetworkStorage<T> storage, T storable);
+	
+	/**
+	 * Tells the network that the given storage wants to get rid of the given
+	 * storable from its inventory.
+	 */
+	public <T extends IStorable> void addUnwanted(INetworkStorage<T> storage, T storable);
+	
 }

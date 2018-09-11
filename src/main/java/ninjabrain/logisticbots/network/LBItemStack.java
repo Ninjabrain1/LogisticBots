@@ -71,7 +71,9 @@ public class LBItemStack implements IStorable {
 			if (requested == null) {
 				extracted = itemHandler.extractItem(i, Integer.MAX_VALUE, simulate);
 				if (!extracted.isEmpty()) {
-					requested = new ItemStack(extracted.getItem(), extracted.getMaxStackSize() - extracted.getCount());
+//					requested = new ItemStack(extracted.getItem(), extracted.getMaxStackSize() - extracted.getCount());
+					requested = extracted.copy();
+					requested.setCount(extracted.getMaxStackSize() - extracted.getCount());
 				}
 			}
 			// TODO how to handle item damage / metadata?

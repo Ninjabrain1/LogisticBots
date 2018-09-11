@@ -1,8 +1,13 @@
 package ninjabrain.logisticbots.network;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.commons.lang3.tuple.Pair;
+
+import net.minecraft.item.Item;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import ninjabrain.logisticbots.api.network.INetwork;
@@ -20,7 +25,7 @@ public class Network implements INetwork {
 	
 	protected final World world;
 	
-	protected final ArrayList<ITransporter<? extends IStorable>> robots, robotsToAdd, robotsToRemove;
+	protected final ArrayList<ITransporter<LBItemStack>> robots, robotsToAdd, robotsToRemove;
 	
 	/**
 	 * Each entry in this List is a List of storages that all have the same
@@ -29,14 +34,19 @@ public class Network implements INetwork {
 	 * values is low (only -1 to 1 is used by default) for a lot of methods in this
 	 * class to be efficient.
 	 **/
-	protected final List<ListWithPriority<INetworkStorage<LBItemStack>>> openInputStorages;
-	protected final List<ListWithPriority<INetworkStorage<LBItemStack>>> openOutputStorages;
+	protected final List<ListWithPriority<INetworkStorage<LBItemStack>>> openInputStorages, openOutputStorages;
 	
 	/**
 	 * A list of all storages in this network. Should contain all storages
 	 * regardless of priority, openInput and openOutput.
 	 */
-	protected final List<INetworkStorage<? extends IStorable>> allStorages;
+	protected final List<INetworkStorage<LBItemStack>> allStorages;
+	
+	/**
+	 * List of storages that want certain items that they dont have and want to get
+	 * rid of items they do have.
+	 */
+	protected final Map<Item, Pair<INetworkStorage<LBItemStack>, LBItemStack>> wanted, unwanted;
 	
 	/**
 	 * Create a new empty Logistic Network
@@ -44,13 +54,16 @@ public class Network implements INetwork {
 	public Network(World world) {
 		this.world = world;
 		
-		robots = new ArrayList<ITransporter<? extends IStorable>>();
-		robotsToAdd = new ArrayList<ITransporter<? extends IStorable>>();
-		robotsToRemove = new ArrayList<ITransporter<? extends IStorable>>();
+		robots = new ArrayList<ITransporter<LBItemStack>>();
+		robotsToAdd = new ArrayList<ITransporter<LBItemStack>>();
+		robotsToRemove = new ArrayList<ITransporter<LBItemStack>>();
 		
 		openInputStorages = new ArrayList<ListWithPriority<INetworkStorage<LBItemStack>>>();
 		openOutputStorages = new ArrayList<ListWithPriority<INetworkStorage<LBItemStack>>>();
-		allStorages = new ArrayList<INetworkStorage<? extends IStorable>>();
+		allStorages = new ArrayList<INetworkStorage<LBItemStack>>();
+		
+		wanted = new HashMap<Item, Pair<INetworkStorage<LBItemStack>, LBItemStack>>();
+		unwanted = new HashMap<Item, Pair<INetworkStorage<LBItemStack>, LBItemStack>>();
 		
 		NetworkManager.addNetworkToWorld(this, world);
 	}
@@ -62,28 +75,42 @@ public class Network implements INetwork {
 		// for(ITransporter<? extends IStorable> robot : robots) {
 		// robot.updateTask();
 		// }
-		for (ITransporter<? extends IStorable> toRemove : robotsToRemove) {
+		for (ITransporter<LBItemStack> toRemove : robotsToRemove) {
 			robots.remove(toRemove);
 		}
 		robotsToRemove.clear();
-		for (ITransporter<? extends IStorable> toAdd : robotsToAdd) {
+		for (ITransporter<LBItemStack> toAdd : robotsToAdd) {
 			robots.add(toAdd);
 		}
 		robotsToAdd.clear();
 		
-		for (ITransporter<? extends IStorable> robot : robots) {
+		for (ITransporter<LBItemStack> robot : robots) {
 			List<INetworkStorage<LBItemStack>> providers = getStoragesFromPriority(-1, true, false);
 			List<INetworkStorage<LBItemStack>> storages = getStoragesFromPriority(0, true, true);
 			if (!robot.hasTask() && providers.size() > 0 && storages.size() > 0) {
 				TaskItemTransfer pickUp = new TaskItemTransfer(providers.get(0), true);
 				TaskItemTransfer dropOff = new TaskItemTransfer(storages.get(0), false);
 				pickUp.setNextTask(dropOff);
-				((ITransporter<LBItemStack>)robot).setTask(pickUp);
+				((ITransporter<LBItemStack>) robot).setTask(pickUp);
 			}
 		}
 		
 		// System.out.println("Robots: " + robots.size() + ", Storages: " +
 		// allStorages.size());
+	}
+	
+	@Override
+	public <T extends IStorable> void addWanted(INetworkStorage<T> storage, T storable) {
+//		if (storage.getStorableType() == LBItemStack.class) {
+//			
+//		}
+		
+	}
+	
+	@Override
+	public <T extends IStorable> void addUnwanted(INetworkStorage<T> storage, T storable) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 	public boolean contains(BlockPos pos) {
@@ -95,13 +122,17 @@ public class Network implements INetwork {
 		return contains(storage.getPos());
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public void addStorage(INetworkStorage<? extends IStorable> storage) {
-		if (storage.hasOpenInput())
-			getStoragesFromPriority(storage.getPriority(), true, true).add((INetworkStorage<LBItemStack>) storage);
-		if (storage.hasOpenOutput())
-			getStoragesFromPriority(storage.getPriority(), true, false).add((INetworkStorage<LBItemStack>) storage);
-		allStorages.add(storage);
+		if (storage.getStorableType() == LBItemStack.class) {
+			INetworkStorage<LBItemStack> itemStorage = (INetworkStorage<LBItemStack>) storage;
+			if (storage.hasOpenInput())
+				getStoragesFromPriority(storage.getPriority(), true, true).add(itemStorage);
+			if (storage.hasOpenOutput())
+				getStoragesFromPriority(storage.getPriority(), true, false).add(itemStorage);
+			allStorages.add(itemStorage);
+		}
 	}
 	
 	@Override
@@ -183,15 +214,20 @@ public class Network implements INetwork {
 		return contains(transporter.getPos());
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public <T extends IStorable> void addTransporter(ITransporter<T> transporter) {
-		robotsToAdd.add(transporter);
-		transporter.setTask(new TaskMovement<T>(new BlockPos(1000, 10, 0)));
+		if (transporter.getStorableType() == LBItemStack.class) {
+			robotsToAdd.add((ITransporter<LBItemStack>) transporter);
+		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public void removeTransporter(ITransporter<? extends IStorable> transporter) {
-		robotsToRemove.add(transporter);
+		if (transporter.getStorableType() == LBItemStack.class) {
+			robotsToRemove.add((ITransporter<LBItemStack>) transporter);
+		}
 	}
 	
 }

@@ -31,4 +31,9 @@ public interface INetworkInventory<T extends IStorable> {
 	 */
 	public T extract(T storable, boolean simulate);
 	
+	/**
+	 * Returns the type of IStorable this inventory stores.
+	 */
+	public Class<T> getStorableType();
+	
 }

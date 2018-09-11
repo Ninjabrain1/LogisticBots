@@ -102,6 +102,11 @@ public class EntityLogisticRobot extends Entity implements ITransporter<LBItemSt
 	}
 	
 	@Override
+	public Class<LBItemStack> getStorableType() {
+		return LBItemStack.class;
+	}
+	
+	@Override
 	public LBItemStack insert(LBItemStack storable, boolean simulate) {
 		ItemStack remainder = itemHandler.insertItem(0, storable.getStack(), simulate);
 		return new LBItemStack(remainder);

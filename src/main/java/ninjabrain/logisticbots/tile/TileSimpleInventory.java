@@ -2,6 +2,7 @@ package ninjabrain.logisticbots.tile;
 
 import javax.annotation.Nullable;
 
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
@@ -12,6 +13,7 @@ import net.minecraftforge.items.ItemStackHandler;
 import ninjabrain.logisticbots.api.network.INetwork;
 import ninjabrain.logisticbots.api.network.INetworkStorage;
 import ninjabrain.logisticbots.api.network.NetworkManager;
+import ninjabrain.logisticbots.item.ModItems;
 import ninjabrain.logisticbots.network.LBItemStack;
 
 /**
@@ -81,6 +83,13 @@ public abstract class TileSimpleInventory extends TileEntity implements INetwork
 	@Override
 	public void setNetwork(INetwork network) {
 		this.network = network;
+		if (network != null)
+			network.addWanted(this, new LBItemStack(new ItemStack(ModItems.logisticsRobot)));
+	}
+	
+	@Override
+	public Class<LBItemStack> getStorableType() {
+		return LBItemStack.class;
 	}
 	
 	@Override
