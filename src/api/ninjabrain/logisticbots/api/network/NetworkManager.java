@@ -44,32 +44,34 @@ public class NetworkManager {
 	public static void onWorldLoad(WorldEvent.Load event) {
 		World world = event.getWorld();
 		if (!world.isRemote) {
+			// Init WorldSavedData for each loaded world
 			MapStorage worldStorage = world.getPerWorldStorage();
+			
 			String networksIdentifier = getNetworkCollectionIdentifier(world.provider);
-			worldStorage.setData(networksIdentifier, new NetworkCollection(networksIdentifier));
+			worldStorage.setData(networksIdentifier, new WorldSavedMap<INetwork<?>>(networksIdentifier));
 			
 			String transportersIdentifier = getUnassignedTransportersIdentifier(world.provider);
-			worldStorage.setData(transportersIdentifier, new TransporterCollection(transportersIdentifier));
+			worldStorage.setData(transportersIdentifier, new WorldSavedMap<ITransporter<?>>(transportersIdentifier));
 			
 			String storagesIdentifier = getUnassignedStoragesIdentifier(world.provider);
-			worldStorage.setData(storagesIdentifier, new StorageCollection(storagesIdentifier));
+			worldStorage.setData(storagesIdentifier, new WorldSavedMap<INetworkStorage<?>>(storagesIdentifier));
 		}
 	}
 	
 	/**
 	 * Updates every Logistic Network in each logical server world every tick
 	 */
+	@SuppressWarnings("unchecked")
 	@SubscribeEvent
 	public static void onWorldTick(WorldTickEvent event) {
 		if (!event.world.isRemote && event.phase == Phase.END) {
-			NetworkCollection netCol = getNetworkCollection(event.world);
-			Collection<NetworkList<? extends IStorable>> networkLists = netCol.networkMap.values();
-			for (NetworkList<? extends IStorable> networkList : networkLists) {
-				// Is it OK to use lambda here?
+			WorldSavedMap<INetwork<?>> netCol = (WorldSavedMap<INetwork<?>>) getNetworkCollection(event.world);
+			Collection<ComponentList<INetwork<?>, ? extends IStorable>> networkLists = netCol.map.values();
+			for (ComponentList<INetwork<?>, ? extends IStorable> networkList : networkLists) {
+				// TODO Is it OK to use lambda here?
 				networkList.forEach(network -> network.onUpdate());
 			}
 		}
-		
 	}
 	
 	/**
@@ -78,12 +80,12 @@ public class NetworkManager {
 	 */
 	public static <T extends IStorable> void addNetworkToWorld(INetwork<T> network, World world) {
 		Class<T> type = network.getType();
-		NetworkList<T> networkList = getNetworkList(world, type);
+		ComponentList<INetwork<T>, T> networkList = getNetworkList(world, type);
 		if (!networkList.contains(network)) {
 			networkList.add(network);
 		}
-		TransporterList<T> unassTransp = getUnassignedTransporters(world, type);
-		StorageList<T> unassStorag = getUnassignedStorages(world, type);
+		ComponentList<ITransporter<T>, T> unassTransp = getUnassignedTransporters(world, type);
+		ComponentList<INetworkStorage<T>, T> unassStorag = getUnassignedStorages(world, type);
 		Iterator<ITransporter<T>> transpIterator = unassTransp.iterator();
 		while (transpIterator.hasNext()) {
 			ITransporter<T> transporter = transpIterator.next();
@@ -184,7 +186,7 @@ public class NetworkManager {
 	 */
 	public static <T extends IStorable> INetwork<T> addNetworkProvider(INetworkProvider<T> provider) {
 		INetwork<T> newNetwork = provider.createNewNetwork();
-		NetworkList<T> networkList = getNetworkList(provider.getWorld(), provider.getType());
+		ComponentList<INetwork<T>, T> networkList = getNetworkList(provider.getWorld(), provider.getType());
 		for (INetwork<T> network : networkList) {
 			// TODO the provider might be able to merge with more than one network
 			if (newNetwork.canMerge(network) && network.canMerge(newNetwork)) {
@@ -208,36 +210,42 @@ public class NetworkManager {
 	/**
 	 * Returns the {@link NetworkCollection} that is attached to the given world
 	 */
-	public static NetworkCollection getNetworkCollection(World world) {
+	public static WorldSavedMap<?> getNetworkCollection(World world) {
 		String identifier = getNetworkCollectionIdentifier(world.provider);
-		return (NetworkCollection) world.getPerWorldStorage().getOrLoadData(NetworkCollection.class, identifier);
+		return (WorldSavedMap<?>) world.getPerWorldStorage().getOrLoadData(WorldSavedMap.class, identifier);
 	}
 	
 	/**
 	 * Returns the list of networks of the given type that is attached to the given
 	 * world
 	 */
-	public static <T extends IStorable> NetworkList<T> getNetworkList(World world, Class<T> type) {
-		return getNetworkCollection(world).getListFromType(type);
+	@SuppressWarnings("unchecked")
+	public static <T extends IStorable> ComponentList<INetwork<T>, T> getNetworkList(World world, Class<T> type) {
+		return ((WorldSavedMap<INetwork<T>>) getNetworkCollection(world)).getListFromType(type);
 	}
 	
 	/**
 	 * Returns the list of unassigned transporters of the given type in the given
 	 * world
 	 */
-	public static <T extends IStorable> TransporterList<T> getUnassignedTransporters(World world, Class<T> type) {
+//	public static <T extends IStorable> TransporterList<T> getUnassignedTransporters(World world, Class<T> type) {
+//		String identifier = getUnassignedTransportersIdentifier(world.provider);
+//		return ((TransporterCollection) world.getPerWorldStorage().getOrLoadData(TransporterCollection.class,
+//				identifier)).getListFromType(type);
+//	}
+	@SuppressWarnings("unchecked")
+	public static <T extends IStorable> ComponentList<ITransporter<T>, T> getUnassignedTransporters(World world, Class<T> type) {
 		String identifier = getUnassignedTransportersIdentifier(world.provider);
-		return ((TransporterCollection) world.getPerWorldStorage().getOrLoadData(TransporterCollection.class,
-				identifier)).getListFromType(type);
+		return ((WorldSavedMap<ITransporter<T>>) world.getPerWorldStorage().getOrLoadData(WorldSavedMap.class, identifier)).getListFromType(type);
 	}
 	
 	/**
 	 * Returns the list of unassigned storages of the given type in the given world
 	 */
-	public static <T extends IStorable> StorageList<T> getUnassignedStorages(World world, Class<T> type) {
+	@SuppressWarnings("unchecked")
+	public static <T extends IStorable> ComponentList<INetworkStorage<T>, T> getUnassignedStorages(World world, Class<T> type) {
 		String identifier = getUnassignedStoragesIdentifier(world.provider);
-		return ((StorageCollection) world.getPerWorldStorage().getOrLoadData(StorageCollection.class, identifier))
-				.getListFromType(type);
+		return ((WorldSavedMap<INetworkStorage<T>>) world.getPerWorldStorage().getOrLoadData(WorldSavedMap.class, identifier)).getListFromType(type);
 	}
 	
 	private static String getNetworkCollectionIdentifier(WorldProvider provider) {

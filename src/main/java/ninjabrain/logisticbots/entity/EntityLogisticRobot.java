@@ -13,6 +13,7 @@ import net.minecraftforge.items.ItemStackHandler;
 import ninjabrain.logisticbots.api.network.INetwork;
 import ninjabrain.logisticbots.api.network.ITask;
 import ninjabrain.logisticbots.api.network.ITransporter;
+import ninjabrain.logisticbots.api.network.ITransporterStorage;
 import ninjabrain.logisticbots.network.LBItemStack;
 
 public class EntityLogisticRobot extends Entity implements ITransporter<LBItemStack> {
@@ -189,6 +190,11 @@ public class EntityLogisticRobot extends Entity implements ITransporter<LBItemSt
 	@Override
 	public Class<LBItemStack> getType() {
 		return LBItemStack.class;
+	}
+	
+	@Override
+	public void onAddedToTransporterStorage(ITransporterStorage storage) {
+		world.removeEntity(this);
 	}
 	
 	/**

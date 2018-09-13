@@ -71,9 +71,11 @@ public class Network implements INetwork<LBItemStack> {
 	public void onUpdate() {
 		// TODO use lambda or a traditional for loop?
 		robots.forEach(robot -> robot.updateTask());
-		// for(ITransporter<LBItemStack> robot : robots) {
-		// robot.updateTask();
-		// }
+//		for (ITransporter<LBItemStack> robot : robots) {
+//			robot.updateTask();
+//		}
+		robots.forEach(robot -> recallIfFree(robot));
+		
 		for (ITransporter<LBItemStack> toRemove : robotsToRemove) {
 			robots.remove(toRemove);
 		}
@@ -102,18 +104,24 @@ public class Network implements INetwork<LBItemStack> {
 		}
 	}
 	
+	private void recallIfFree(ITransporter<LBItemStack> robot) {
+		if (!robot.hasTask()) {
+//			robot.setTask(new TaskRecall(dest));
+		}
+	}
+	
 	@Override
 	public void addWanted(INetworkStorage<LBItemStack> storage, LBItemStack storable) {
-		// if (storage.getStorableType() == LBItemStack.class) {
-		//
-		// }
 		
 	}
 	
 	@Override
 	public void addUnwanted(INetworkStorage<LBItemStack> storage, LBItemStack storable) {
-		// TODO Auto-generated method stub
 		
+	}
+	
+	private Object getKey(LBItemStack lbItemStack) {
+		return lbItemStack.stack.getItem();
 	}
 	
 	public boolean contains(BlockPos pos) {

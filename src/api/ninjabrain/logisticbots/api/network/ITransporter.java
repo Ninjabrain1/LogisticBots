@@ -7,7 +7,7 @@ package ninjabrain.logisticbots.api.network;
 public interface ITransporter<T extends IStorable> extends INetworkComponent<T>, INetworkInventory<T> {
 	
 	/**
-	 * Called once every tick. Updates stuff relevant to the task. 
+	 * Called once every tick. Updates stuff relevant to the task.
 	 */
 	public void updateTask();
 	
@@ -20,6 +20,11 @@ public interface ITransporter<T extends IStorable> extends INetworkComponent<T>,
 	 * Returns true if this ITransporter is already working on a task.
 	 */
 	public boolean hasTask();
+	
+	/**
+	 * Called when this transporter is added to a ITransporterStorage.
+	 */
+	public void onAddedToTransporterStorage(ITransporterStorage storage);
 	
 	/**
 	 * Returns the type of IStorable this can transport.
