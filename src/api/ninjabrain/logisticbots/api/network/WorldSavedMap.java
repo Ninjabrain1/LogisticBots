@@ -9,29 +9,8 @@ import net.minecraft.world.storage.WorldSavedData;
 
 public class WorldSavedMap<C> extends WorldSavedData {
 	
-//	public class StorageMap extends WorldSavedMap<INetworkStorage<?>> {
-//		
-//		StorageMap(String name) {
-//			super(name);
-//		}
-//	};
-//	
-//	public class TransporterMap extends WorldSavedMap<ITransporter<?>> {
-//		
-//		TransporterMap(String name) {
-//			super(name);
-//		}
-//	};
-//	
-//	public class TransporterStorageMap extends WorldSavedMap<ITransporterStorage> {
-//		
-//		TransporterStorageMap(String name) {
-//			super(name);
-//		}
-//	};
-	
 	/**
-	 * A Map of all unassigned INetworkStorages in the world this is attached to
+	 * A Map of ComponentLists that store C's
 	 */
 	public final Map<Class<? extends IStorable>, ComponentList<C, ? extends IStorable>> map;
 	

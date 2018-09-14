@@ -7,10 +7,10 @@ import java.util.Map;
 
 import org.apache.commons.lang3.tuple.Pair;
 
-import ninjabrain.logisticbots.api.network.ISubNetwork;
 import ninjabrain.logisticbots.api.network.INetwork;
 import ninjabrain.logisticbots.api.network.INetworkProvider;
 import ninjabrain.logisticbots.api.network.INetworkStorage;
+import ninjabrain.logisticbots.api.network.ISubNetwork;
 import ninjabrain.logisticbots.api.network.ITask;
 import ninjabrain.logisticbots.api.network.ITransporter;
 import ninjabrain.logisticbots.api.network.ITransporterStorage;

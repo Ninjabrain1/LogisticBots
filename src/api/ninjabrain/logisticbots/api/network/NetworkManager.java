@@ -15,7 +15,6 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
 import net.minecraftforge.fml.common.gameevent.TickEvent.WorldTickEvent;
-import ninjabrain.logisticbots.network.LBItemStack;
 
 /**
  * Main class for dealing with Logistic Networks
@@ -38,7 +37,8 @@ public class NetworkManager {
 	 **/
 	public static final List<Class<? extends IStorable>> storableTypes = new ArrayList<Class<? extends IStorable>>();
 	/**
-	 * Maps IStorable types to new ISubNetworks that can store/transport the given type.
+	 * Maps IStorable types to new ISubNetworks that can store/transport the given
+	 * type.
 	 */
 	public static final Map<Class<? extends IStorable>, Function<INetwork, ? extends ISubNetwork<?>>> networkFromType = new HashMap<Class<? extends IStorable>, Function<INetwork, ? extends ISubNetwork<?>>>();
 	
@@ -59,17 +59,17 @@ public class NetworkManager {
 			MapStorage worldStorage = world.getPerWorldStorage();
 			
 			String networksIdentifier = getNetworkCollectionIdentifier(world.provider);
-			worldStorage.setData(networksIdentifier, new WorldSavedMap<INetwork>(networksIdentifier));
+			worldStorage.setData(networksIdentifier, new WorldSavedList<INetwork>(networksIdentifier));
+			
+			String transporterStoragesIdentifier = getUnassignedTransporterStoragesIdentifier(world.provider);
+			worldStorage.setData(transporterStoragesIdentifier,
+					new WorldSavedList<ITransporterStorage>(transporterStoragesIdentifier));
 			
 			String transportersIdentifier = getUnassignedTransportersIdentifier(world.provider);
 			worldStorage.setData(transportersIdentifier, new WorldSavedMap<ITransporter<?>>(transportersIdentifier));
 			
 			String storagesIdentifier = getUnassignedStoragesIdentifier(world.provider);
 			worldStorage.setData(storagesIdentifier, new WorldSavedMap<INetworkStorage<?>>(storagesIdentifier));
-			
-			String transporterStoragesIdentifier = getUnassignedTransporterStoragesIdentifier(world.provider);
-			worldStorage.setData(transporterStoragesIdentifier,
-					new WorldSavedMap<ITransporterStorage>(storagesIdentifier));
 		}
 	}
 	
@@ -89,14 +89,14 @@ public class NetworkManager {
 	 * tick.
 	 */
 	public static void addNetworkToWorld(INetwork network, World world) {
-		ComponentList<INetwork, ?> networkList = getNetworkList(world);
+		List<INetwork> networkList = getNetworkList(world);
 		if (!networkList.contains(network)) {
 			networkList.add(network);
 		}
 		for (Class<? extends IStorable> type : storableTypes) {
 			addSubNetworkToWorld(network.getSubNetwork(type), world);
 		}
-		ComponentList<ITransporterStorage, ?> unassTranspStorag = getUnassignedTransporterStorages(world);
+		List<ITransporterStorage> unassTranspStorag = getUnassignedTransporterStorages(world);
 		Iterator<ITransporterStorage> transpStorageIterator = unassTranspStorag.iterator();
 		while (transpStorageIterator.hasNext()) {
 			ITransporterStorage storage = transpStorageIterator.next();
@@ -143,8 +143,8 @@ public class NetworkManager {
 	 * Finds the {@link ISubNetwork} that can add the given INetworkStorage to
 	 * itself (if such a network exists).
 	 * 
-	 * @return The ISubNetwork the storage was added to, null if it was not added to a
-	 * network
+	 * @return The ISubNetwork the storage was added to, null if it was not added to
+	 * a network
 	 */
 	public static <T extends IStorable> ISubNetwork<T> addNetworkStorage(INetworkStorage<T> storage) {
 		Class<T> type = storage.getType();
@@ -225,8 +225,8 @@ public class NetworkManager {
 	}
 	
 	/**
-	 * Removes the given transporter from the world, it can no longer be interacted with
-	 * by INetworks or ISubNetworks.
+	 * Removes the given transporter from the world, it can no longer be interacted
+	 * with by INetworks or ISubNetworks.
 	 */
 	public static <T extends IStorable> void removeTransporter(ITransporter<T> transporter) {
 		if (transporter.getNetwork() != null) {
@@ -237,15 +237,15 @@ public class NetworkManager {
 	}
 	
 	/**
-	 * Creates a new {@link INetwork} according to provider.createNewNetwork().
-	 * If the new network can merge with existing networks in its world they will
+	 * Creates a new {@link INetwork} according to provider.createNewNetwork(). If
+	 * the new network can merge with existing networks in its world they will
 	 * merge.
 	 * 
 	 * @return The INetwork the provider became a part of
 	 */
 	public static INetwork addNetworkProvider(INetworkProvider provider) {
 		INetwork newNetwork = provider.createNewNetwork();
-		ComponentList<INetwork, ?> networkList = getNetworkList(provider.getWorld());
+		List<INetwork> networkList = getNetworkList(provider.getWorld());
 		for (INetwork network : networkList) {
 			// TODO the provider might be able to merge with more than one network
 			if (newNetwork.canMerge(network) && network.canMerge(newNetwork)) {
@@ -257,10 +257,9 @@ public class NetworkManager {
 	}
 	
 	/**
-	 * Removes the given provider from its {@link INetwork}, possibly removing
-	 * the entire network if it was the only provider left in the network, or
-	 * splitting its network into two if the provider was the only link between
-	 * them.
+	 * Removes the given provider from its {@link INetwork}, possibly removing the
+	 * entire network if it was the only provider left in the network, or splitting
+	 * its network into two if the provider was the only link between them.
 	 */
 	public static void removeNetworkProvider(INetworkProvider provider) {
 		// No need to check if getNetwork() returns null, it should never return null
@@ -282,11 +281,22 @@ public class NetworkManager {
 	 * Returns the list of networks that is attached to the given world
 	 */
 	@SuppressWarnings("unchecked")
-	public static ComponentList<INetwork, ?> getNetworkList(World world) {
+	public static List<INetwork> getNetworkList(World world) {
 		String identifier = getNetworkCollectionIdentifier(world.provider);
-		WorldSavedMap<INetwork> networkMap = (WorldSavedMap<INetwork>) world.getPerWorldStorage()
-				.getOrLoadData(WorldSavedMap.class, identifier);
-		return networkMap.getListFromType(LBItemStack.class);
+		WorldSavedList<INetwork> networkList = (WorldSavedList<INetwork>) world.getPerWorldStorage()
+				.getOrLoadData(WorldSavedList.class, identifier);
+		return networkList.list;
+	}
+	
+	/**
+	 * Returns the list of unassigned transporter storages in the given world
+	 */
+	@SuppressWarnings("unchecked")
+	public static List<ITransporterStorage> getUnassignedTransporterStorages(World world) {
+		String identifier = getUnassignedTransporterStoragesIdentifier(world.provider);
+		WorldSavedList<ITransporterStorage> transpStorageList = (WorldSavedList<ITransporterStorage>) world
+				.getPerWorldStorage().getOrLoadData(WorldSavedList.class, identifier);
+		return transpStorageList.list;
 	}
 	
 	/**
@@ -310,16 +320,6 @@ public class NetworkManager {
 		String identifier = getUnassignedStoragesIdentifier(world.provider);
 		return ((WorldSavedMap<INetworkStorage<T>>) world.getPerWorldStorage().getOrLoadData(WorldSavedMap.class,
 				identifier)).getListFromType(type);
-	}
-	
-	/**
-	 * Returns the list of unassigned transporter storages in the given world
-	 */
-	@SuppressWarnings("unchecked")
-	public static ComponentList<ITransporterStorage, ?> getUnassignedTransporterStorages(World world) {
-		String identifier = getUnassignedTransporterStoragesIdentifier(world.provider);
-		return ((WorldSavedMap<ITransporterStorage>) world.getPerWorldStorage().getOrLoadData(WorldSavedMap.class,
-				identifier)).getListFromType(LBItemStack.class);
 	}
 	
 	private static String getNetworkCollectionIdentifier(WorldProvider provider) {
