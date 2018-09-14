@@ -185,6 +185,15 @@ public class EntityLogisticRobot extends Entity implements ITransporter<LBItemSt
 	@Override
 	public void setNetwork(ISubNetwork<LBItemStack> network) {
 		this.network = network;
+		if (network == null) {
+			motionX = 0;
+			motionY = 0;
+			motionZ = 0;
+			markVelocityChanged();
+		} else {
+			// To update velocity
+			setTask(task);
+		}
 	}
 	
 	@Override
