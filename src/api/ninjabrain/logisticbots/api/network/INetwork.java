@@ -1,89 +1,70 @@
 package ninjabrain.logisticbots.api.network;
 
+import net.minecraft.util.math.BlockPos;
+
 /**
- * A Logistics Network. Handles interactions between different types of
- * logistics chests and robots.
+ * A Logistic Network. Handles storing of transporters and merging with other
+ * networks. Each Logistic Network has a set of ISubNetworks that each handle
+ * storage and transportation of one type of IStorable.
  */
-public interface INetwork<T extends IStorable> {
+public interface INetwork {
 	
 	/**
-	 * Called every tick of the world this Network is attached to. Attach a network
-	 * to a world by calling NetworkManager.addNetworkToWorld().
+	 * Returns true if the given block position is within range of this network.
 	 */
-	public void onUpdate();
+	public boolean contains(BlockPos pos);
 	
 	/**
-	 * Returns true if the network can add the storage
+	 * Returns the ISubNetwork to this network that handles storables of the given
+	 * type.
 	 */
-	public boolean canAddStorage(INetworkStorage<T> storage);
-	
-	/**
-	 * Adds the storage to this network. It is adviced to not call this method
-	 * directly, see
-	 * {@link NetworkManager#addNetworkStorage(INetworkStorage, boolean, boolean, int)}.
-	 * 
-	 * @param storage
-	 * The storage that should be added
-	 */
-	public void addStorage(INetworkStorage<T> storage);
-	
-	/**
-	 * Removes the storage from this network. It is adviced to not call this method
-	 * directly, see {@link NetworkManager#removeNetworkStorage(INetworkStorage)}.
-	 */
-	public void removeStorage(INetworkStorage<T> storage);
+	public <T extends IStorable> ISubNetwork<T> getSubNetwork(Class<T> type);
 	
 	/**
 	 * Returns true if this INetwork can merge with the given INetwork. This
 	 * typically means that the networks are within range of each other, but there
 	 * might also be other conditions.
 	 */
-	public boolean canMerge(INetwork<?> network);
+	public boolean canMerge(INetwork network);
 	
 	/**
 	 * Merges the given network with this one. This network will be the result, the
 	 * given network should be discarded. It is adviced to not call this method
 	 * directly, see {@link NetworkManager#addNetworkProvider(INetworkProvider)}.
 	 */
-	public void merge(INetwork<?> network);
+	public void merge(INetwork network);
 	
 	/**
 	 * Removes the given provider from this network, possibly splitting this network
 	 * into two if the provider was the only link between them.
 	 */
-	public void removeProvider(INetworkProvider<T> provider);
+	public void removeProvider(INetworkProvider provider);
 	
 	/**
-	 * Returns true if this INetwork can add the given {@link ITransporter} to this
-	 * network.
+	 * Returns true if the network can add the transporter storage
 	 */
-	public boolean canAddTransporter(ITransporter<T> transporter);
+	public boolean canAddTransporterStorage(ITransporterStorage storage);
 	
 	/**
-	 * Adds the {@link ITransporter} to this network.
+	 * Adds the storage to this network. It is adviced to not call this method
+	 * directly, see
+	 * {@link NetworkManager#addTransporterStorage(ITransporterStorage)}.
+	 * 
+	 * @param storage
+	 * The storage that should be added
 	 */
-	public  void addTransporter(ITransporter<T> transporter);
+	public void addTransporterStorage(ITransporterStorage storage);
 	
 	/**
-	 * Removes the {@link ITransporter} from this network.
+	 * Removes the storage from this network. It is adviced to not call this method
+	 * directly, see
+	 * {@link NetworkManager#removeTransporterStorage(ITransporterStorage)}.
 	 */
-	public void removeTransporter(ITransporter<T> transporter);
+	public void removeTransporterStorage(ITransporterStorage storage);
 	
 	/**
-	 * Tells the network that the given storage wants the given storable delivered
-	 * to it.
+	 * Called every tick from the world this Network is attached to. Attach a
+	 * network to a world by calling NetworkManager.addNetworkToWorld().
 	 */
-	public void addWanted(INetworkStorage<T> storage, T storable);
-	
-	/**
-	 * Tells the network that the given storage wants to get rid of the given
-	 * storable from its inventory.
-	 */
-	public void addUnwanted(INetworkStorage<T> storage, T storable);
-	
-	/**
-	 * Returns the type of this network.
-	 */
-	public Class<T> getType();
-	
+	public void onUpdate();
 }

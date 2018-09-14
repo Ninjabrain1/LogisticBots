@@ -10,7 +10,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
-import ninjabrain.logisticbots.api.network.INetwork;
+import ninjabrain.logisticbots.api.network.ISubNetwork;
 import ninjabrain.logisticbots.api.network.INetworkStorage;
 import ninjabrain.logisticbots.api.network.NetworkManager;
 import ninjabrain.logisticbots.item.ModItems;
@@ -27,7 +27,7 @@ public abstract class TileSimpleInventory extends TileEntity implements INetwork
 	
 	/** The Logistic Network this chest is connected to, null if none **/
 	@Nullable
-	protected INetwork<LBItemStack> network;
+	protected ISubNetwork<LBItemStack> network;
 	
 	protected ItemStackHandler createItemStackHandler() {
 		return new ItemStackHandler(INVENTORY_SIZE);
@@ -76,12 +76,12 @@ public abstract class TileSimpleInventory extends TileEntity implements INetwork
 	public abstract String getGUIName();
 	
 	@Override
-	public INetwork<LBItemStack> getNetwork() {
+	public ISubNetwork<LBItemStack> getNetwork() {
 		return network;
 	}
 	
 	@Override
-	public void setNetwork(INetwork<LBItemStack> network) {
+	public void setNetwork(ISubNetwork<LBItemStack> network) {
 		this.network = network;
 		if (network != null)
 			network.addWanted(this, new LBItemStack(new ItemStack(ModItems.logisticsRobot)));

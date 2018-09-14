@@ -1,11 +1,14 @@
 package ninjabrain.logisticbots.api.network;
 
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
+
 /**
  * A "source" of a Logistic Network (Roboport for example). To notify the world
  * that an instance of your INetworkProvider has been created call
  * {@link NetworkManager#addNetworkProvider}
  */
-public interface INetworkProvider<T extends IStorable> extends INetworkComponent<T> {
+public interface INetworkProvider {
 	
 	// TODO remove generic type from INetworkProvider
 	
@@ -13,12 +16,26 @@ public interface INetworkProvider<T extends IStorable> extends INetworkComponent
 	 * On being placed this method will be called if this INetworkProvider is not
 	 * compatible with any other network.
 	 */
-	public INetwork<T> createNewNetwork();
+	public INetwork createNewNetwork();
 	
-
 	/**
-	 * Returns the type of IStorables the resulting network will transport.
+	 * Returns the world this storage is in
 	 */
-	public Class<T> getType();
+	public World getWorld();
+	
+	/**
+	 * Returns the INetwork this storage belongs to, null if none
+	 */
+	public INetwork getNetwork();
+	
+	/**
+	 * Sets the INetwork this storage belongs to
+	 */
+	public void setNetwork(INetwork network);
+	
+	/**
+	 * Returns the position of this component in the world.
+	 */
+	public BlockPos getPos();
 	
 }

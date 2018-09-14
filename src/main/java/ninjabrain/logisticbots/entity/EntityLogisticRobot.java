@@ -10,7 +10,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.items.ItemStackHandler;
-import ninjabrain.logisticbots.api.network.INetwork;
+import ninjabrain.logisticbots.api.network.ISubNetwork;
 import ninjabrain.logisticbots.api.network.ITask;
 import ninjabrain.logisticbots.api.network.ITransporter;
 import ninjabrain.logisticbots.api.network.ITransporterStorage;
@@ -24,7 +24,7 @@ public class EntityLogisticRobot extends Entity implements ITransporter<LBItemSt
 	
 	protected static final String TAG_INVENTORY = "invStack";
 	
-	protected INetwork<LBItemStack> network;
+	protected ISubNetwork<LBItemStack> network;
 	protected ItemStackHandler itemHandler = createItemStackHandler();
 	protected ITask<LBItemStack> task;
 	
@@ -178,12 +178,12 @@ public class EntityLogisticRobot extends Entity implements ITransporter<LBItemSt
 	}
 
 	@Override
-	public INetwork<LBItemStack> getNetwork() {
+	public ISubNetwork<LBItemStack> getNetwork() {
 		return network;
 	}
 
 	@Override
-	public void setNetwork(INetwork<LBItemStack> network) {
+	public void setNetwork(ISubNetwork<LBItemStack> network) {
 		this.network = network;
 	}
 	

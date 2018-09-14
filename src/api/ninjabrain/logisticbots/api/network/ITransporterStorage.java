@@ -1,6 +1,7 @@
 package ninjabrain.logisticbots.api.network;
 
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
 /**
  * A component of a Logistic Network that stores ITransporters
@@ -27,5 +28,20 @@ public interface ITransporterStorage {
 	 * Returns the position of this component in the world.
 	 */
 	public BlockPos getPos();
+	
+	/**
+	 * Returns the INetwork this storage belongs to, null if none
+	 */
+	public INetwork getNetwork();
+	
+	/**
+	 * Sets the INetwork this storage belongs to
+	 */
+	public void setNetwork(INetwork network);
+	
+	/**
+	 * Returns the world this storage is in
+	 */
+	public World getWorld();
 	
 }

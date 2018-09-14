@@ -11,14 +11,14 @@ public interface INetworkComponent<T extends IStorable> {
 	public World getWorld();
 	
 	/**
-	 * Returns the INetwork this storage belongs to, null if none
+	 * Returns the ISubNetwork this storage belongs to, null if none
 	 */
-	public INetwork<T> getNetwork();
+	public ISubNetwork<T> getNetwork();
 	
 	/**
-	 * Sets the INetwork this storage belongs to
+	 * Sets the ISubNetwork this storage belongs to
 	 */
-	public void setNetwork(INetwork<T> network);
+	public void setNetwork(ISubNetwork<T> network);
 	
 	/**
 	 * Returns the position of this component in the world.

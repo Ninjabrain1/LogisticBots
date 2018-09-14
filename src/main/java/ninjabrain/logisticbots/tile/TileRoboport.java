@@ -7,15 +7,14 @@ import ninjabrain.logisticbots.api.network.IStorable;
 import ninjabrain.logisticbots.api.network.ITransporter;
 import ninjabrain.logisticbots.api.network.ITransporterStorage;
 import ninjabrain.logisticbots.api.network.NetworkManager;
-import ninjabrain.logisticbots.network.LBItemStack;
 import ninjabrain.logisticbots.network.Network;
 
 /**
  * Roboport tile entity that contains a Logistic Network
  */
-public class TileRoboport extends TileEntity implements INetworkProvider<LBItemStack>, ITransporterStorage {
+public class TileRoboport extends TileEntity implements INetworkProvider, ITransporterStorage {
 	
-	INetwork<LBItemStack> network;
+	INetwork network;
 	
 	@Override
 	public void onLoad() {
@@ -38,23 +37,18 @@ public class TileRoboport extends TileEntity implements INetworkProvider<LBItemS
 	}
 
 	@Override
-	public INetwork<LBItemStack> getNetwork() {
+	public INetwork getNetwork() {
 		return network;
 	}
 	
 	@Override
-	public void setNetwork(INetwork<LBItemStack> network) {
+	public void setNetwork(INetwork network) {
 		this.network = network;
 	}
 
 	@Override
-	public INetwork<LBItemStack> createNewNetwork() {
+	public INetwork createNewNetwork() {
 		return new Network(world);
-	}
-	
-	@Override
-	public Class<LBItemStack> getType() {
-		return LBItemStack.class;
 	}
 
 	@Override
