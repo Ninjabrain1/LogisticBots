@@ -22,6 +22,9 @@ public class TileRoboport extends TileEntity implements INetworkProvider, ITrans
 		// specific networks
 		if (!world.isRemote) {
 			network = NetworkManager.addNetworkProvider(this);
+			if (network != NetworkManager.addTransporterStorage(this)) {
+				throw new Error("Error when loading a roboport at " + getPos() + ", network is ambiguous.");
+			}
 		}
 	}
 	
@@ -32,8 +35,10 @@ public class TileRoboport extends TileEntity implements INetworkProvider, ITrans
 	}
 	
 	public void onRemove() {
-		if (!world.isRemote)
+		if (!world.isRemote) {
 			NetworkManager.removeNetworkProvider(this);
+			NetworkManager.removeTransporterStorage(this);
+		}
 	}
 
 	@Override
@@ -48,7 +53,9 @@ public class TileRoboport extends TileEntity implements INetworkProvider, ITrans
 
 	@Override
 	public INetwork createNewNetwork() {
-		return new Network(world);
+		Network network = new Network(world);
+		network.getProviders().add(this);
+		return network;
 	}
 
 	@Override
@@ -60,7 +67,7 @@ public class TileRoboport extends TileEntity implements INetworkProvider, ITrans
 	@Override
 	public boolean hasSpace(ITransporter<? extends IStorable> transp) {
 		// TODO Auto-generated method stub
-		return false;
+		return true;
 	}
 
 	@Override

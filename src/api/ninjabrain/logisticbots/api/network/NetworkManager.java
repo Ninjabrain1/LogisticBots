@@ -135,7 +135,7 @@ public class NetworkManager {
 	/**
 	 * Removes a network from a world.
 	 */
-	public static void removeNetworkfromoWorld(INetwork network, World world) {
+	public static void removeNetworkfromWorld(INetwork network, World world) {
 		getNetworkList(world).remove(network);
 	}
 	
@@ -248,7 +248,7 @@ public class NetworkManager {
 		List<INetwork> networkList = getNetworkList(provider.getWorld());
 		for (INetwork network : networkList) {
 			// TODO the provider might be able to merge with more than one network
-			if (newNetwork.canMerge(network) && network.canMerge(newNetwork)) {
+			if (network != newNetwork && newNetwork.canMerge(network) && network.canMerge(newNetwork)) {
 				network.merge(newNetwork);
 				return network;
 			}

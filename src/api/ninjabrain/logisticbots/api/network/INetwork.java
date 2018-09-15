@@ -1,5 +1,7 @@
 package ninjabrain.logisticbots.api.network;
 
+import java.util.List;
+
 import net.minecraft.util.math.BlockPos;
 
 /**
@@ -61,6 +63,26 @@ public interface INetwork {
 	 * {@link NetworkManager#removeTransporterStorage(ITransporterStorage)}.
 	 */
 	public void removeTransporterStorage(ITransporterStorage storage);
+	
+	/**
+	 * Returns the "best" storage for the transporter. This is typically the closest
+	 * storage to the transporter that also has enough capacity to store the
+	 * transporter.
+	 * 
+	 * @return The best ITransporterStorage for the transporter, null if no
+	 * ITransporterStorage in the network can store the transporter.
+	 */
+	public ITransporterStorage getBestTransporterStorage(ITransporter<?> transporter);
+	
+	/**
+	 * Returns a list of all ITransporterStorages in the network
+	 */
+	public List<ITransporterStorage> getTransporterStorages();
+	
+	/**
+	 * Returns a list of all INetworkProviders in the network
+	 */
+	public List<INetworkProvider> getProviders();
 	
 	/**
 	 * Called every tick from the world this Network is attached to. Attach a

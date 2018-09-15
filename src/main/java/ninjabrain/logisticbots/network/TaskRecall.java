@@ -4,7 +4,7 @@ import ninjabrain.logisticbots.api.network.IStorable;
 import ninjabrain.logisticbots.api.network.ITransporter;
 import ninjabrain.logisticbots.api.network.ITransporterStorage;
 
-public class TaskRecall extends TaskMovement<IStorable> {
+public class TaskRecall<T extends IStorable> extends TaskMovement<T> {
 	
 	ITransporterStorage dest;
 	
@@ -14,7 +14,7 @@ public class TaskRecall extends TaskMovement<IStorable> {
 	}
 	
 	@Override
-	public void onComplete(ITransporter<IStorable> transporter) {
+	public void onComplete(ITransporter<T> transporter) {
 		super.onComplete(transporter);
 		
 		if (dest.hasSpace(transporter)) {

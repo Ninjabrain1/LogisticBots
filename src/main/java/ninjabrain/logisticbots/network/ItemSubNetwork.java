@@ -90,7 +90,7 @@ public class ItemSubNetwork implements ISubNetwork<LBItemStack> {
 		}
 		robotsToAdd.clear();
 		
-		updateLBItems();
+//		updateLBItems();
 		
 		// System.out.println("Robots: " + robots.size() + ", Storages: " +
 		// allStorages.size());
@@ -111,7 +111,8 @@ public class ItemSubNetwork implements ISubNetwork<LBItemStack> {
 	
 	private void recallIfFree(ITransporter<LBItemStack> robot) {
 		if (!robot.hasTask()) {
-			// robot.setTask(new TaskRecall(dest));
+			ITransporterStorage bestStorage = superNet.getBestTransporterStorage(robot);
+			robot.setTask(new TaskRecall<LBItemStack>(bestStorage));
 		}
 	}
 	
@@ -201,6 +202,7 @@ public class ItemSubNetwork implements ISubNetwork<LBItemStack> {
 	
 	@Override
 	public void addTransporter(ITransporter<LBItemStack> transporter) {
+		System.out.println("add");
 		if (transporter.getStorableType() == LBItemStack.class) {
 			robotsToAdd.add((ITransporter<LBItemStack>) transporter);
 		}
@@ -217,7 +219,7 @@ public class ItemSubNetwork implements ISubNetwork<LBItemStack> {
 	public Class<LBItemStack> getType() {
 		return LBItemStack.class;
 	}
-
+	
 	@Override
 	public void onProviderRemoved(INetworkProvider provider) {
 		// TODO
