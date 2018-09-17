@@ -22,6 +22,11 @@ public interface ITransporter<T extends IStorable> extends INetworkComponent<T>,
 	public boolean hasTask();
 	
 	/**
+	 * Returns true if this ITransporter is carrying something.
+	 */
+	public boolean isCarryingSomething();
+	
+	/**
 	 * Called when this transporter is added to a ITransporterStorage.
 	 */
 	public void onAddedToTransporterStorage(ITransporterStorage storage);

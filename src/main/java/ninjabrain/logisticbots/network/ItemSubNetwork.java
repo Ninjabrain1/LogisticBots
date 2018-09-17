@@ -95,27 +95,12 @@ public class ItemSubNetwork implements ISubNetwork<LBItemStack> {
 		}
 		robotsToAdd.clear();
 		
-		// updateLBItems();
-		
 		// System.out.println("Robots: " + robots.size() + ", Storages: " +
 		// allStorages.size());
 	}
 	
-	private void updateLBItems() {
-		for (ITransporter<LBItemStack> robot : robots) {
-			List<INetworkStorage<LBItemStack>> providers = getStoragesFromPriority(-1, true, false);
-			List<INetworkStorage<LBItemStack>> storages = getStoragesFromPriority(0, true, true);
-			if (!robot.hasTask() && providers.size() > 0 && storages.size() > 0) {
-				ITask<LBItemStack> pickUp = new TaskItemTransfer(providers.get(0), LBItemStack.ANY_STACK, true);
-				ITask<LBItemStack> dropOff = new TaskItemTransfer(storages.get(0), LBItemStack.ANY_STACK, false);
-				pickUp.setNextTask(dropOff);
-				robot.setTask(pickUp);
-			}
-		}
-	}
-	
 	protected void recallIfFree(ITransporter<LBItemStack> robot) {
-		if (!robot.hasTask()) {
+		if (!robot.hasTask() && !robot.isCarryingSomething()) {
 			ITransporterStorage bestStorage = superNet.getBestTransporterStorage(robot);
 			robot.setTask(new TaskRecall<LBItemStack>(bestStorage));
 		}
@@ -126,13 +111,25 @@ public class ItemSubNetwork implements ISubNetwork<LBItemStack> {
 	 */
 	protected void transportStack(LBItemStack stack, INetworkStorage<LBItemStack> from,
 			INetworkStorage<LBItemStack> to) {
-		ITransporterStorage ts = superNet.getClosestTransporterStorageThatContains(from.getPos(), LBItemStack.class);
-		ITransporter<LBItemStack> robot = ts.extract(LBItemStack.class);
-		
-		ITask<LBItemStack> pickUp = new TaskItemTransfer(from, stack, true);
-		ITask<LBItemStack> dropOff = new TaskItemTransfer(to, stack, false);
-		pickUp.setNextTask(dropOff);
-		robot.setTask(pickUp);
+		while (!stack.stack.isEmpty()) {
+			ITransporterStorage ts = superNet.getClosestTransporterStorageThatContains(from.getPos(),
+					LBItemStack.class);
+			if (ts == null) // TODO save transport info and do it when there are available transporters
+				return;
+			
+			ITransporter<LBItemStack> robot = ts.extract(LBItemStack.class);
+			
+			LBItemStack remainder = robot.insert(stack, true);
+			LBItemStack inserted = new LBItemStack(stack);
+			inserted.stack.setCount(stack.stack.getCount() - remainder.stack.getCount());
+			
+			ITask<LBItemStack> pickUp = new TaskItemTransfer(from, inserted, true);
+			ITask<LBItemStack> dropOff = new TaskItemTransfer(to, inserted, false);
+			pickUp.setNextTask(dropOff);
+			robot.setTask(pickUp);
+			
+			stack = remainder;
+		}
 		
 	}
 	

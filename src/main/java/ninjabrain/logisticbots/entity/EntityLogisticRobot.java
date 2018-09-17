@@ -27,12 +27,19 @@ public class EntityLogisticRobot extends Entity implements ITransporter<LBItemSt
 	protected ISubNetwork<LBItemStack> network;
 	protected ItemStackHandler itemHandler = createItemStackHandler();
 	protected ITask<LBItemStack> task;
+	/** If the robot is not activated it will not update its task */
+	protected boolean activated;
 	
 	/** The speed of Logistic Robots in Blocks/tick */
 	protected static float speed = 0.3f;
 	
 	public EntityLogisticRobot(World worldIn) {
+		this(worldIn, true);
+	}
+	
+	public EntityLogisticRobot(World worldIn, boolean activated) {
 		super(worldIn);
+		this.activated = activated;
 	}
 	
 	protected ItemStackHandler createItemStackHandler() {
@@ -42,7 +49,15 @@ public class EntityLogisticRobot extends Entity implements ITransporter<LBItemSt
 				super.onContentsChanged(slot);
 				dataManager.set(INVENTORY, getStackInSlot(0));
 			}
+			@Override
+			public int getSlotLimit(int slot) {
+				return 1;
+			}
 		};
+	}
+	
+	public void activate() {
+		this.activated = true;
 	}
 	
 	@Override
@@ -88,9 +103,7 @@ public class EntityLogisticRobot extends Entity implements ITransporter<LBItemSt
 		return itemHandler.getStackInSlot(0);
 	}
 	
-	/**
-	 * @return true if this robot is carrying any items, false otherwise
-	 */
+	@Override
 	public boolean isCarryingSomething() {
 		return !itemHandler.getStackInSlot(0).isEmpty();
 	}
@@ -135,7 +148,7 @@ public class EntityLogisticRobot extends Entity implements ITransporter<LBItemSt
 	
 	@Override
 	public void updateTask() {
-		if (task != null) {
+		if (task != null && activated) {
 			ticks++;
 			Vec3d robotPos = lerp(startPos, desPos, (double) ticks / eta);
 			setPositionAndUpdate(robotPos.x, robotPos.y, robotPos.z);

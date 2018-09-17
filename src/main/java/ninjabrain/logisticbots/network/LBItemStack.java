@@ -17,6 +17,10 @@ public class LBItemStack implements IStorable {
 		this.stack = stack.copy();
 	}
 	
+	public LBItemStack(@Nonnull LBItemStack stack) {
+		this.stack = stack.stack.copy();
+	}
+
 	public ItemStack getStack() {
 		return stack;
 	}

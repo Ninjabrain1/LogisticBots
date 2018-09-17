@@ -1,7 +1,11 @@
 package ninjabrain.logisticbots.tile;
 
+import java.util.LinkedList;
+import java.util.Queue;
+
 import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ITickable;
 import net.minecraft.util.math.Vec3d;
 import ninjabrain.logisticbots.api.network.INetwork;
 import ninjabrain.logisticbots.api.network.INetworkProvider;
@@ -16,11 +20,13 @@ import ninjabrain.logisticbots.network.Network;
 /**
  * Roboport tile entity that contains a Logistic Network
  */
-public class TileRoboport extends TileEntity implements INetworkProvider, ITransporterStorage {
+public class TileRoboport extends TileEntity implements ITickable, INetworkProvider, ITransporterStorage {
 	
 	INetwork network;
 	
 	Vec3d robotIO;
+	
+	Queue<EntityLogisticRobot> robotsToSpawn = new LinkedList<EntityLogisticRobot>();
 	
 	@Override
 	public void onLoad() {
@@ -41,8 +47,20 @@ public class TileRoboport extends TileEntity implements INetworkProvider, ITrans
 		onRemove();
 	}
 	
+	@Override
+	public void update() {
+		if (robotsToSpawn.size() > 0) {
+			spawnRobot(robotsToSpawn.poll());
+		}
+	}
+	
 	public void onRemove() {
 		if (!world.isRemote) {
+//			while(robotsToSpawn.size() > 0) {
+//				spawnRobot(robotsToSpawn.poll());
+//			}
+			robotsToSpawn.forEach(robot -> spawnRobot(robot));
+			
 			NetworkManager.removeNetworkProvider(this);
 			NetworkManager.removeTransporterStorage(this);
 		}
@@ -81,14 +99,19 @@ public class TileRoboport extends TileEntity implements INetworkProvider, ITrans
 	public <T extends IStorable> ITransporter<T> extract(Class<T> type) {
 		// TODO roboport inventory
 		if (type == LBItemStack.class) {
-			Entity robot = new EntityLogisticRobot(world);
+			EntityLogisticRobot robot = new EntityLogisticRobot(world, false);
 			robot.setPosition(robotIO.x, robotIO.y, robotIO.z);
 			
-			world.spawnEntity(robot);
+			robotsToSpawn.add(robot);
 			
 			return (ITransporter<T>) robot;
 		}
 		return null;
+	}
+	
+	private void spawnRobot(EntityLogisticRobot e) {
+		world.spawnEntity(e);
+		e.activate();
 	}
 
 	@Override
