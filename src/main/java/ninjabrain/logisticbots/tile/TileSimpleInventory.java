@@ -21,7 +21,7 @@ import ninjabrain.logisticbots.network.LBItemStack;
  */
 public abstract class TileSimpleInventory extends TileEntity implements INetworkStorage<LBItemStack> {
 	
-	private static final int INVENTORY_SIZE = 54;
+	protected static final int INVENTORY_SIZE = 54;
 	
 	protected ItemStackHandler itemHandler = createItemStackHandler();
 	

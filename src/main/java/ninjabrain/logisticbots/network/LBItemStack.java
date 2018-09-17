@@ -14,7 +14,7 @@ public class LBItemStack implements IStorable {
 	protected final ItemStack stack;
 	
 	public LBItemStack(@Nonnull ItemStack stack) {
-		this.stack = stack;
+		this.stack = stack.copy();
 	}
 	
 	public ItemStack getStack() {
@@ -63,7 +63,7 @@ public class LBItemStack implements IStorable {
 		if (storable == ANY_STACK) {
 			requested = null;
 		} else {
-			requested = storable.getStack();
+			requested = storable.getStack().copy();
 		}
 		for (int i = 0; i < itemHandler.getSlots(); i++) {
 			if (requested != null && requested.getCount() == 0)

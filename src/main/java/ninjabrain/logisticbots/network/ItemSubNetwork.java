@@ -5,8 +5,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nonnull;
+
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.math.BlockPos;
 import ninjabrain.logisticbots.api.network.INetwork;
 import ninjabrain.logisticbots.api.network.INetworkProvider;
 import ninjabrain.logisticbots.api.network.INetworkStorage;
@@ -47,10 +52,10 @@ public class ItemSubNetwork implements ISubNetwork<LBItemStack> {
 	protected final List<ITransporterStorage> transpStorages;
 	
 	/**
-	 * List of storages that want certain items that they dont have and want to get
-	 * rid of items they do have.
+	 * Map of stuff that storages want to push to the network / pull from the
+	 * network.
 	 */
-	protected final Map<Object, Pair<INetworkStorage<LBItemStack>, LBItemStack>> wanted, unwanted;
+	protected final Map<Object, List<Pair<INetworkStorage<LBItemStack>, LBItemStack>>> wanted, unwanted;
 	
 	/**
 	 * Create a new empty Logistic Network
@@ -68,8 +73,8 @@ public class ItemSubNetwork implements ISubNetwork<LBItemStack> {
 		
 		transpStorages = new ArrayList<ITransporterStorage>();
 		
-		wanted = new HashMap<Object, Pair<INetworkStorage<LBItemStack>, LBItemStack>>();
-		unwanted = new HashMap<Object, Pair<INetworkStorage<LBItemStack>, LBItemStack>>();
+		wanted = new HashMap<Object, List<Pair<INetworkStorage<LBItemStack>, LBItemStack>>>();
+		unwanted = new HashMap<Object, List<Pair<INetworkStorage<LBItemStack>, LBItemStack>>>();
 	}
 	
 	@Override
@@ -90,7 +95,7 @@ public class ItemSubNetwork implements ISubNetwork<LBItemStack> {
 		}
 		robotsToAdd.clear();
 		
-//		updateLBItems();
+		// updateLBItems();
 		
 		// System.out.println("Robots: " + robots.size() + ", Storages: " +
 		// allStorages.size());
@@ -109,11 +114,26 @@ public class ItemSubNetwork implements ISubNetwork<LBItemStack> {
 		}
 	}
 	
-	private void recallIfFree(ITransporter<LBItemStack> robot) {
+	protected void recallIfFree(ITransporter<LBItemStack> robot) {
 		if (!robot.hasTask()) {
 			ITransporterStorage bestStorage = superNet.getBestTransporterStorage(robot);
 			robot.setTask(new TaskRecall<LBItemStack>(bestStorage));
 		}
+	}
+	
+	/**
+	 * Creates a task for a robot to transport the given stack to the
+	 */
+	protected void transportStack(LBItemStack stack, INetworkStorage<LBItemStack> from,
+			INetworkStorage<LBItemStack> to) {
+		ITransporterStorage ts = superNet.getClosestTransporterStorageThatContains(from.getPos(), LBItemStack.class);
+		ITransporter<LBItemStack> robot = ts.extract(LBItemStack.class);
+		
+		ITask<LBItemStack> pickUp = new TaskItemTransfer(from, stack, true);
+		ITask<LBItemStack> dropOff = new TaskItemTransfer(to, stack, false);
+		pickUp.setNextTask(dropOff);
+		robot.setTask(pickUp);
+		
 	}
 	
 	@Override
@@ -122,12 +142,73 @@ public class ItemSubNetwork implements ISubNetwork<LBItemStack> {
 	}
 	
 	@Override
-	public void addUnwanted(INetworkStorage<LBItemStack> storage, LBItemStack storable) {
-		
+	public void addUnwanted(INetworkStorage<LBItemStack> storage, LBItemStack item) {
+		Object key = getKey(item);
+		// If there exists a storage that actively wants the item
+		List<Pair<INetworkStorage<LBItemStack>, LBItemStack>> storagesThatWantItem = wanted.get(key);
+		if (storagesThatWantItem != null && storagesThatWantItem.size() > 0) {
+			// int index = getClosestStorage(storage, storagesThatWantItem);
+			// TODO
+		}
+		// TODO check if robots are free
+		// If no storage actively wants the item find any storage that has space
+		if (!item.stack.isEmpty()) {
+			for (int i = openInputStorages.size() - 1; i >= 0; i--) {
+				ListWithPriority<INetworkStorage<LBItemStack>> openInputStoragesPriority = openInputStorages.get(i);
+				// Find all storages with space
+				List<INetworkStorage<LBItemStack>> storagesWithSpace = new ArrayList<INetworkStorage<LBItemStack>>();
+				for (INetworkStorage<LBItemStack> openInputStorage : openInputStoragesPriority) {
+					if (openInputStorage.insert(item, true) != item) {
+						storagesWithSpace.add(openInputStorage);
+					}
+				}
+				// Find closest storage with space
+				while (!item.stack.isEmpty() && storagesWithSpace.size() > 0) {
+					int index = getClosestStorage(storage, storagesWithSpace);
+					INetworkStorage<LBItemStack> closestStorage = storagesWithSpace.get(index);
+					LBItemStack remaining = closestStorage.insert(item, true);
+					int insertedCount = item.stack.getCount() - remaining.stack.getCount();
+					ItemStack insertedStack = item.stack.copy();
+					insertedStack.setCount(insertedCount);
+					LBItemStack inserted = new LBItemStack(insertedStack);
+					transportStack(inserted, storage, closestStorage);
+					item = remaining;
+					storagesWithSpace.remove(index);
+				}
+				if (item.stack.isEmpty())
+					break;
+			}
+		}
+		// If no storage has space for the item
+		if (!item.stack.isEmpty()) {
+			List<Pair<INetworkStorage<LBItemStack>, LBItemStack>> storagesThatDontWantItem = unwanted
+					.computeIfAbsent(key, k -> new ArrayList<Pair<INetworkStorage<LBItemStack>, LBItemStack>>());
+			storagesThatDontWantItem.add(new ImmutablePair<INetworkStorage<LBItemStack>, LBItemStack>(storage, item));
+		}
 	}
 	
-	private Object getKey(LBItemStack lbItemStack) {
+	protected Object getKey(LBItemStack lbItemStack) {
 		return lbItemStack.stack.getItem();
+	}
+	
+	/**
+	 * Returns the index of the storage in the given list that is closest to ref.
+	 */
+	protected int getClosestStorage(@Nonnull INetworkStorage<LBItemStack> ref,
+			@Nonnull List<INetworkStorage<LBItemStack>> list) {
+		// TODO optimize, preferably constant/log time
+		BlockPos refPos = ref.getPos();
+		double minDist2 = Double.MAX_VALUE;
+		int bestStorageIndex = -1;
+		for (int i = 0; i < list.size(); i++) {
+			INetworkStorage<?> storage = list.get(i);
+			double dist2 = refPos.distanceSq(storage.getPos());
+			if (dist2 < minDist2) {
+				minDist2 = dist2;
+				bestStorageIndex = i;
+			}
+		}
+		return bestStorageIndex;
 	}
 	
 	@Override
@@ -202,7 +283,6 @@ public class ItemSubNetwork implements ISubNetwork<LBItemStack> {
 	
 	@Override
 	public void addTransporter(ITransporter<LBItemStack> transporter) {
-		System.out.println("add");
 		if (transporter.getStorableType() == LBItemStack.class) {
 			robotsToAdd.add((ITransporter<LBItemStack>) transporter);
 		}

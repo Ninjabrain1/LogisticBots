@@ -1,12 +1,16 @@
 package ninjabrain.logisticbots.tile;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.math.Vec3d;
 import ninjabrain.logisticbots.api.network.INetwork;
 import ninjabrain.logisticbots.api.network.INetworkProvider;
 import ninjabrain.logisticbots.api.network.IStorable;
 import ninjabrain.logisticbots.api.network.ITransporter;
 import ninjabrain.logisticbots.api.network.ITransporterStorage;
 import ninjabrain.logisticbots.api.network.NetworkManager;
+import ninjabrain.logisticbots.entity.EntityLogisticRobot;
+import ninjabrain.logisticbots.network.LBItemStack;
 import ninjabrain.logisticbots.network.Network;
 
 /**
@@ -15,6 +19,8 @@ import ninjabrain.logisticbots.network.Network;
 public class TileRoboport extends TileEntity implements INetworkProvider, ITransporterStorage {
 	
 	INetwork network;
+	
+	Vec3d robotIO;
 	
 	@Override
 	public void onLoad() {
@@ -25,6 +31,7 @@ public class TileRoboport extends TileEntity implements INetworkProvider, ITrans
 			if (network != NetworkManager.addTransporterStorage(this)) {
 				throw new Error("Error when loading a roboport at " + getPos() + ", network is ambiguous.");
 			}
+			robotIO = new Vec3d(getPos().getX() + 0.5, getPos().getY() + 1.5, getPos().getZ() + 0.5);
 		}
 	}
 	
@@ -60,20 +67,36 @@ public class TileRoboport extends TileEntity implements INetworkProvider, ITrans
 
 	@Override
 	public void insert(ITransporter<? extends IStorable> transp) {
-		// TODO Auto-generated method stub
-		
+		// TODO roboport inventory
 	}
 
 	@Override
 	public boolean hasSpace(ITransporter<? extends IStorable> transp) {
-		// TODO Auto-generated method stub
+		// TODO roboport inventory
 		return true;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public <T extends IStorable> ITransporter<T> extract(Class<T> type) {
-		// TODO Auto-generated method stub
+		// TODO roboport inventory
+		if (type == LBItemStack.class) {
+			Entity robot = new EntityLogisticRobot(world);
+			robot.setPosition(robotIO.x, robotIO.y, robotIO.z);
+			
+			world.spawnEntity(robot);
+			
+			return (ITransporter<T>) robot;
+		}
 		return null;
 	}
+
+	@Override
+	public boolean hasTransporter(Class<? extends IStorable> type) {
+		// TODO roboport inventory
+		return true;
+	}
+	
+	
 	
 }

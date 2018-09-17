@@ -112,6 +112,23 @@ public class Network implements INetwork {
 	}
 	
 	@Override
+	public ITransporterStorage getClosestTransporterStorageThatContains(BlockPos pos, Class<? extends IStorable> type) {
+		// TODO optimize, preferably constant/log time
+		double minDist2 = Double.MAX_VALUE;
+		ITransporterStorage closestStorage = null;
+		for (ITransporterStorage storage : transpStorages) {
+			if (storage.hasTransporter(type)) {
+				double dist2 = pos.distanceSq(storage.getPos());
+				if (dist2 < minDist2) {
+					minDist2 = dist2;
+					closestStorage = storage;
+				}
+			}
+		}
+		return closestStorage;
+	}
+	
+	@Override
 	public List<INetworkProvider> getProviders() {
 		return providers;
 	}

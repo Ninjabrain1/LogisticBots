@@ -75,6 +75,13 @@ public interface INetwork {
 	public ITransporterStorage getBestTransporterStorage(ITransporter<?> transporter);
 	
 	/**
+	 * Returns the closest transporter storage to pos that has at least one
+	 * transporter of the given type. Returns null if no storage has transporters of
+	 * the given type.
+	 */
+	public ITransporterStorage getClosestTransporterStorageThatContains(BlockPos pos, Class<? extends IStorable> type);
+	
+	/**
 	 * Returns a list of all ITransporterStorages in the network
 	 */
 	public List<ITransporterStorage> getTransporterStorages();

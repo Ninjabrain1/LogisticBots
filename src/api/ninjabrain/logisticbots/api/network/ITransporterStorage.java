@@ -25,6 +25,11 @@ public interface ITransporterStorage {
 	public <T extends IStorable> ITransporter<T> extract(Class<T> type);
 	
 	/**
+	 * Returns true if this storage has a transporter of the given type
+	 */
+	public boolean hasTransporter(Class<? extends IStorable> type);
+	
+	/**
 	 * Returns the position of this component in the world.
 	 */
 	public BlockPos getPos();
